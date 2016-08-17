@@ -48,6 +48,7 @@ class MainFrame:
                     if event.key == pygame.K_f:
                         pygame.display.toggle_fullscreen() 
  
+            
             # detecta eventos
             self.scene.on_event()
  

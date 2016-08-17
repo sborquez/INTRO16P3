@@ -1,6 +1,6 @@
-import escenas
 import pygame
 from pygame.local import *
+from escenas import *
 
 class Inicio(Scene):
     """ Ventana de inicio del juego"""
@@ -58,7 +58,9 @@ class Estadisticas(Scene):
     def on_draw(self, screen): 
         pass
 
-class Jugador(pygame.Sprite)
+class Jugador(pygame.Sprite):
+
+    """ Informacion de un jugador """
 
     def __init__(self, ID, coor_x, coor_y):
         self.ID = ID
@@ -66,17 +68,26 @@ class Jugador(pygame.Sprite)
         self.y = coor_y
         self.vidas = 5
         self.alerta = 0
+        # self.sprite = ...
+        # self.rect = ...
 
-    def mover(self):
+    def mover(self, direccion):
         pass
 
-    def disparar(self):
+    def disparar(self, direccion):
         pass
 
-    def respawn(self):
+    def quitarvida(self):
         pass
+
+    def morir(self, coor_x, coor_y):
+        pass
+
+    def cambiar_alerta(self, cambio):
+        pass
+
 
 if __name__ == "__main__":
-    Main = Mainframe()
+    Main = MainFrame()
     Main.change_scene(Inicio(Main))
     Main.loop()
