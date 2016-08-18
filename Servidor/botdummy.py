@@ -1,6 +1,11 @@
 import numpy
 import random
 
+
+## cambiar!
+n=10
+##cambiar!
+
 def escoger ( accion ):
     if ( accion == 3 ):
         l = [-1,1]
@@ -15,6 +20,10 @@ def escoger ( accion ):
 def periodico ( r ):
     if ( r >= n ): return (n-r)
     return r
+
+def amenaza ( valor ):
+    l = [3,3,2,2,1]
+    return l [ abs ( valor ) -1 ]
 
 def mover ( posicion, battlefield ):
     
@@ -36,9 +45,14 @@ def disparar ( amenaza, posicion ):
         return posicion[0]+delta
     return posicion[1]+delta
 
-#def estimar_amenaza ( posicion,battlefield ):
- #   for i in xrange(2):
-  #      for j in [-5,-4,-3,-2,-1,1,2,3,4,5]:
-   #         if  battlefieldperiodico ( posicion[i]+j )
-
-
+def estimar_amenaza ( posicion,battlefield ):
+    amenazas = list()
+    for i in xrange(2):
+        for j in [-5,-4,-3,-2,-1,1,2,3,4,5]:
+	        if (i == 0):
+                if ( battlefield [ periodico ( posicion[i]+j ) ][1] == 1 ):
+                    amenazas.append( amenaza (j) )
+            else:
+                if ( battlefield [0][ periodico ( posicion[i]+j ) ] == 1 ):
+                    amenazas.append( amenaza (j) )
+    return amenazas
