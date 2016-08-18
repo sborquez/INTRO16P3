@@ -49,10 +49,17 @@ def estimar_amenaza ( posicion,battlefield ):
     amenazas = list()
     for i in xrange(2):
         for j in [-5,-4,-3,-2,-1,1,2,3,4,5]:
-	        if (i == 0):
-                if ( battlefield [ periodico ( posicion[i]+j ) ][1] == 1 ):
+            if (i == 0):
+                if ( battlefield [ periodico ( posicion[i]+j)][1] == 1 ):
                     amenazas.append( amenaza (j) )
             else:
                 if ( battlefield [0][ periodico ( posicion[i]+j ) ] == 1 ):
                     amenazas.append( amenaza (j) )
     return amenazas
+
+def spawn( battlefield ):
+    while (1):
+        x , y = random.randint( len( battlefield ) ), random.randint( len(battlefield ) )
+        if ( battlefield[x][y] == 0 ):
+            return x,y
+
