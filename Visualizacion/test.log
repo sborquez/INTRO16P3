@@ -1,0 +1,10 @@
+juego:cargar
+conectado:bot
+juego:comenzar
+aparecer:bot,3,4
+moverse:bot,nuevox,nuevoy
+disparar:bot,direccion,None
+muerte:bot
+aparecer:bot,5,7
+juego:terminar
+resultado:bot
