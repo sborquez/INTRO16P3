@@ -7,10 +7,11 @@ pygame.init()
 WIDTH = 852
 HEIGHT = 480
 FULLSCREEN = False
+MOUSE = True
 
-fuente = pygame.font.Font("fuentes/PressStart2P.ttf", 10)
+fuente = pygame.font.Font("data/fuentes/PressStart2P.ttf", 10)
 
-pygame.mouse.set_visible(False)
+pygame.mouse.set_visible(MOUSE)
 
 class MainFrame:
     """Representa la ventana principal del juego.
@@ -34,9 +35,9 @@ class MainFrame:
         "Pone en funcionamiento el juego."
  
         while not self.quit_flag:
-            time = self.clock.tick(30)
+            time = self.clock.tick(60)
 
-            event = None
+            space_pressed = False
              
             # Eventos de Salida
             for event in pygame.event.get():
@@ -47,10 +48,11 @@ class MainFrame:
                         self.quit()
                     if event.key == pygame.K_f:
                         pygame.display.toggle_fullscreen() 
- 
+                    if event.key == pygame.K_SPACE:
+                        space_pressed = True
             
             # detecta eventos
-            self.scene.on_event()
+            self.scene.on_event(space_pressed)
  
             # actualiza la escena
             self.scene.on_update()
