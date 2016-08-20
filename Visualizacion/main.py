@@ -12,13 +12,13 @@ BATTLEFIELDDIVISIONS = 20
 BATTLEFIELDINICIO = (351, 10)
 ESCALA = 4.0/BATTLEFIELDDIVISIONS
 MOV = {"up": (0,  -1),
-        "down": (0, 1),
-        "left": (-1,  0),
-        "rigth": (1,  0)}
+       "down": (0, 1),
+       "left": (-1,  0),
+       "rigth": (1,  0)}
 
-SETH = {"up"   : 0,
-        "down" : 180,
-        "left" : -90,
+SETH = {"up": 0,
+        "down": 180,
+        "left": -90,
         "rigth": 90}
 
 
@@ -169,11 +169,19 @@ class Jugador(pygame.sprite.Sprite):
         self.orientacion = 0
 
         # Datos dibujo
-        self.image = cargar_sprite()
+        idspaceship = randint(0, SPACESHIPS-1)
+        spaceship = choice(os.listdir(os.path.join("data",
+                                                   "sprites",
+                                                   "Players")))
+        spaceship_path = os.path.join("data",
+                                      "sprites",
+                                      "Players",
+                                       spaceship)
+
+        self.image = cargar_sprite(spaceship_path)
         self.rect = self.image.get_rect()
         self.rect.centerx = 0
         self.rect.centery = 0
-        self.speed = [0.5, -0.5]
 
     def aparecer(self, (coor_x, coor_y)):
         """ Coloca un jugador en las coordenadas de cuadrilla x, y."""
@@ -197,8 +205,8 @@ class Jugador(pygame.sprite.Sprite):
         if SETH[direccion] != self.orientacion:
             rotar = SETH[direccion]-self.orientacion
             self.orientacion = SETH[direccion]
-            self.image=pygame.transform.rotate(self.image,-rotar)
-        else: 
+            self.image = pygame.transform.rotate(self.image, -rotar)
+        else:
             self.battlefieldpos_x = round(self.battlefieldpos_x + X*0.1, 2)
             self.battlefieldpos_y = round(self.battlefieldpos_y + Y*0.1, 2)
 
@@ -236,12 +244,27 @@ class Jugador(pygame.sprite.Sprite):
         pass
 
 
-def cargar_sprite(escala=ESCALA):
-    idspaceship = randint(0, SPACESHIPS-1)
+class Bala(pygame.sprite.Sprite):
 
-    spaceship = choice(os.listdir(os.path.join("data", "sprites", "Players")))
-    spaceship_path = os.path.join("data", "sprites", "Players", spaceship)
-    image = load_image(spaceship_path, True)
+    """ Objeto que representara a los disparos. """
+
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+
+        # Datos dibujo
+        self.image = cargar_sprite()
+        self.rect = self.image.get_rect()
+        self.rect.centerx = 0
+        self.rect.centery = 0
+
+        path = os.path.join("data",
+                           "sprites",
+                           "Players")
+
+
+def cargar_sprite(path, escala=ESCALA):
+    
+    image = load_image(path, True)
 
     width, height = image.get_size()
 
@@ -322,10 +345,10 @@ def discriminar_accion(scene, accion, argumentos):
             jugador.mover("up")
         else:
             scene.next_turn = True
-        
 
     # TODO
     elif accion == "disparar":
+
         pass
     # TODO
     elif accion == "muerte":
