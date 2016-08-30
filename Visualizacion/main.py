@@ -6,11 +6,15 @@ from escenas import *
 from time import sleep
 
 TITULO = "Intro 2016"
+
+#  Constantes de tamanhos para dibujar.
 SPACESHIPS = 45
 BATTLEFIELDSIZE = 460.0
 BATTLEFIELDDIVISIONS = 20
 BATTLEFIELDINICIO = (351, 10)
 ESCALA = 4.0/BATTLEFIELDDIVISIONS
+
+# Constantes de giro de las naves.
 MOV = {"up": (0,  -1),
        "down": (0, 1),
        "left": (-1,  0),
@@ -18,8 +22,18 @@ MOV = {"up": (0,  -1),
 
 SETH = {"up": 0,
         "down": 180,
-        "left": -90,
-        "rigth": 90}
+        "left": 90,
+        "rigth": -90}
+
+# Constantes del juego
+Q_turnos = 5
+MAX_vidas = 5
+
+# --------------------
+# DEFINICION DE CLASES
+# --------------------
+
+# Clases de escenas.
 
 
 class Inicio(Scene):
@@ -46,6 +60,8 @@ class Inicio(Scene):
         pygame.mixer.music.play(0, 0.0)
 
     def on_update(self):
+        """ Actualizar datos, cambia de escena si es necesario. """
+
         if self.start_replay:
             pygame.mixer.music.stop()
             self.director.change_scene(Principal(self.director,
@@ -53,10 +69,14 @@ class Inicio(Scene):
                                                  self.replay))
 
     def on_event(self, event):
+        """ Revisa si ocurrio un evento en el bucle principal. """
+
         if event:
             self.start_replay = True
 
     def on_draw(self, screen):
+        """ Refrescar datos en la pantalla."""
+
         screen.blit(self.background, (0, 0))
 
 
@@ -86,7 +106,12 @@ class Principal(Scene):
         pygame.mixer.music.load(musica_path)
         pygame.mixer.music.play(100, 0.0)
 
+        # Datos dibujo
+        self.in_action = ""
+        self.turnos_restantes = Q_turnos
+
     def on_update(self):
+        """ Actualizar datos, cambia de escena si es necesario. """
 
         # Si se termino de leer la partida, pasar a los resultados.
         if self.end_replay:
@@ -102,12 +127,16 @@ class Principal(Scene):
         discriminar_accion(self, accion, argumentos)
 
     def on_event(self, event):
+        """ Revisa si ocurrio un evento en el bucle principal. """
+
         if event:
             pygame.mixer.music.stop()
             # TEST
             self.end_replay = True
 
     def on_draw(self, screen):
+        """ Refrescar datos en la pantalla."""
+
         # Fondo
         screen.blit(self.background, (0, 0))
 
@@ -140,19 +169,27 @@ class Estadisticas(Scene):
         pygame.mixer.music.play(0, 0.0)
 
     def on_update(self):
+        """ Actualizar datos, cambia de escena si es necesario. """
+
         # TODO
         pass
 
     def on_event(self, event):
+        """ Revisa si ocurrio un evento en el bucle principal. """
+
         # TODO
         if event:
             pass
 
     def on_draw(self, screen):
+        """ Refrescar datos en la pantalla."""
+
         # TODO
         screen.blit(self.background, (0, 0))
         pass
 
+
+# Clases de sprites.
 
 class Jugador(pygame.sprite.Sprite):
 
@@ -160,15 +197,16 @@ class Jugador(pygame.sprite.Sprite):
 
     def __init__(self, ID):
         pygame.sprite.Sprite.__init__(self)
-        # Datos jugador
+        # Datos jugador.
         self.ID = ID
         self.alerta = 0
-        self.vidas = 5
+        self.vidas = 2
         self.battlefieldpos_x = 0
         self.battlefieldpos_y = 0
         self.orientacion = 0
+        self.visible = True
 
-        # Datos dibujo
+        # Datos dibujo.
         idspaceship = randint(0, SPACESHIPS-1)
         spaceship = choice(os.listdir(os.path.join("data",
                                                    "sprites",
@@ -176,9 +214,25 @@ class Jugador(pygame.sprite.Sprite):
         spaceship_path = os.path.join("data",
                                       "sprites",
                                       "Players",
-                                       spaceship)
+                                      spaceship)
 
-        self.image = cargar_sprite(spaceship_path)
+        explotion1_path = os.path.join("data",
+                                       "sprites",
+                                       "Explotions",
+                                       "Explosion1.png")
+
+        explotion2_path = os.path.join("data",
+                                       "sprites",
+                                       "Explotions",
+                                       "Explosion2.png")
+
+        self.images = list()
+        self.images.append(cargar_sprite(spaceship_path))
+        self.images.append(cargar_sprite(explotion1_path))
+        self.images.append(cargar_sprite(explotion2_path))
+
+        self.visible = 0
+        self.image = self.images[self.visible]
         self.rect = self.image.get_rect()
         self.rect.centerx = 0
         self.rect.centery = 0
@@ -186,8 +240,12 @@ class Jugador(pygame.sprite.Sprite):
     def aparecer(self, (coor_x, coor_y)):
         """ Coloca un jugador en las coordenadas de cuadrilla x, y."""
 
+        self.visible = 0
+        self.image = self.images[self.visible]
+
         self.battlefieldpos_x = coor_x
         self.battlefieldpos_y = coor_y
+        self.orientacion = 0
 
         new_x, new_y = transformar_coordenadas(coor_x, coor_y)
         self.rect.centerx = new_x
@@ -195,17 +253,17 @@ class Jugador(pygame.sprite.Sprite):
 
     def mostrar(self, screen):
         """ Muestra en pantalla el sprite del jugador."""
-
-        screen.blit(self.image, self.rect)
+        if self.visible != -1:
+            screen.blit(self.image, self.rect)
 
     def mover(self, direccion):
         """ Cambia la posicion de un jugador hacia la direccion dada."""
-        # TODO
+
         X, Y = MOV[direccion]
         if SETH[direccion] != self.orientacion:
             rotar = SETH[direccion]-self.orientacion
             self.orientacion = SETH[direccion]
-            self.image = pygame.transform.rotate(self.image, -rotar)
+            self.image = pygame.transform.rotate(self.image, rotar)
         else:
             self.battlefieldpos_x = round(self.battlefieldpos_x + X*0.1, 2)
             self.battlefieldpos_y = round(self.battlefieldpos_y + Y*0.1, 2)
@@ -230,18 +288,33 @@ class Jugador(pygame.sprite.Sprite):
 
         pass
 
-    def quitarvida(self):
+    def quitar_vida(self):
         # TODO
 
         pass
 
-    def morir(self, (coor_x, coor_y)):
-        # TODO
-        pass
+    def morir(self):
+        if self.visible == 0:
+            self.visible += 1
+            flag = False
+            print "musica",
+
+        elif self.visible == 1:
+            self.visible += 1
+            flag = False
+
+        elif self.visible == 2:
+            flag = True
+
+        self.image = self.images[self.visible]
+        return flag
+
 
     def cambiar_alerta(self, cambio):
         # TODO
         pass
+
+# TODO
 
 
 class Bala(pygame.sprite.Sprite):
@@ -252,18 +325,28 @@ class Bala(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
 
         # Datos dibujo
-        self.image = cargar_sprite()
-        self.rect = self.image.get_rect()
+        self.imagenes = list()
+        for laser in os.listdir(os.path.join("data",
+                                             "sprites",
+                                             "Laser")):
+            path = os.path.join("data",
+                                "sprites",
+                                "Laser",
+                                laser)
+
+            self.imagenes.append(load_image(path, True))
+
+        self.rect = self.imagenes[0].get_rect()
         self.rect.centerx = 0
         self.rect.centery = 0
 
-        path = os.path.join("data",
-                           "sprites",
-                           "Players")
 
+# ------------------------
+# DEFINICION DE FUNCIONES
+# ------------------------
 
 def cargar_sprite(path, escala=ESCALA):
-    
+
     image = load_image(path, True)
 
     width, height = image.get_size()
@@ -313,12 +396,15 @@ def cargar_jugadores(log):
 
 def discriminar_accion(scene, accion, argumentos):
     """ Por cada comando del logfile, determina que accion tomar."""
+    print accion, argumentos,
 
     if accion == "aparecer":
+        sleep(0.05)
         ID, x, y = argumentos.split(",")
         jugador = scene.players[ID]
         jugador.aparecer((int(x), int(y)))
         scene.next_turn = True
+        scene.in_action = "Aparecio: {0} en: ({1},{2})".format(ID,x,y) 
 
     # falta si termina la partida
     elif accion == "juego" and argumentos == "terminar":
@@ -326,7 +412,9 @@ def discriminar_accion(scene, accion, argumentos):
         scene.end_replay = True
 
     elif accion == "moverse":
+        sleep(0.05)
         ID, new_x, new_y = argumentos.split(",")
+        scene.in_action = "Movimiento: {0} hacia: ({1},{2})".format(ID,new_|x,new_y)
         new_x = int(new_x)
         new_y = int(new_y)
 
@@ -348,24 +436,53 @@ def discriminar_accion(scene, accion, argumentos):
 
     # TODO
     elif accion == "disparar":
+        origen, coor_x, coor_y, objetivo = argumentos.split(",")
+        if objetivo == "None":
+            scene.in_action = "Disaparo fallido: {0} a ({1},{2})".format{origen, coor_x, coor_y}
+        else:
+            scene.in_action = "Disaparo acertado: {0} a {1}".format{origen,objetivo}
+        jugador_origen = scene.players[origen]
+        pass
 
-        pass
-    # TODO
     elif accion == "muerte":
-        pass
-    # TODO
+        sleep(0.7)
+        scene.in_action = "Muere: {0}".format{argumentos}
+        jugador = scene.players[argumentos]
+        scene.next_turn = jugador.morir()
+        if scene.next_turn:
+            scene.turnos_restantes = Q_turnos
+
+    elif accion == "colision":
+        sleep(0.7)
+        scene.in_action = "Colisiona: {0}".format{argumentos}
+        jugador = scene.players[argumentos]
+        scene.next_turn = jugador.morir()
+        if scene.next_turn:
+            scene.turnos_restantes = Q_turnos
+
+
     elif accion == "desconectado":
-        pass
+        sleep(0.5)
+        scene.in_action = "Se ha desconectado: {0}".format{argumentos}
+        del scene.players[argumentos]
+        scene.next_turn = True
+
+
     # TODO
     elif accion == "resultado":
         pass
-    # TODO
+
     elif accion == "alertar":
-        pass
-    # TODO
+        ID, nivel = argumentos.split(",")
+        scene.players[ID].alerta = int(nivel)
+    
     else:
         print accion, argumentos
         pass
+
+# -----
+# MAIN
+# -----
 
 if __name__ == "__main__":
     #path = raw_input("Ingrese log: ")
