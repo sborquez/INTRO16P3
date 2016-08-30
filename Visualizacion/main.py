@@ -199,7 +199,7 @@ class Estadisticas(Scene):
     def __init__(self, director, dict_players):
         Scene.__init__(self, director)
         # Informacion de escena
-        background_path=os.path.join("data", "background", "portada.jpg")
+        background_path=os.path.join("data", "background", "resultados.jpg")
         self.background=load_image(background_path)
 
         # Informacion del replay
