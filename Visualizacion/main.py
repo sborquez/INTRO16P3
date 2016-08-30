@@ -107,7 +107,7 @@ class Principal(Scene):
         pygame.mixer.music.play(100, 0.0)
 
         # Datos dibujo
-        self.in_action = ""
+        self.acciones = ["","","","","","","","",""]
         self.turnos_restantes = Q_turnos
 
     def on_update(self):
@@ -120,6 +120,8 @@ class Principal(Scene):
 
         # Si se termino de actualizar los datos de un turno, leer el siguiente.
         if self.next_turn:
+            del self.acciones[-1]
+            self.acciones.insert(0,"")
             self.next_turn = False
             linea = self.replay.pop(0)
             self.linea = linea.strip().split(":")
@@ -142,6 +144,15 @@ class Principal(Scene):
 
         # Cuadrilla
         dibujar_cuadricula(screen)
+
+        # Textos.
+        for i,texto in enumerate(self.acciones):
+            if i == 0:
+                textinscreen = fuente1.render(texto, 1, (255,255,255))
+                screen.blit(textinscreen , (15,90))
+            else:
+                textinscreen = fuente2.render(texto, 1, (255,255,255))
+                screen.blit(textinscreen , (15,85-i*10))
 
         # Jugadores
         for ide, jugador in self.players.items():
@@ -396,7 +407,6 @@ def cargar_jugadores(log):
 
 def discriminar_accion(scene, accion, argumentos):
     """ Por cada comando del logfile, determina que accion tomar."""
-    print accion, argumentos,
 
     if accion == "aparecer":
         sleep(0.05)
@@ -404,7 +414,7 @@ def discriminar_accion(scene, accion, argumentos):
         jugador = scene.players[ID]
         jugador.aparecer((int(x), int(y)))
         scene.next_turn = True
-        scene.in_action = "Aparecio: {0} en: ({1},{2})".format(ID,x,y) 
+        scene.acciones[0] = "Aparecio: {0} en: ({1},{2})".format(ID,x,y) 
 
     # falta si termina la partida
     elif accion == "juego" and argumentos == "terminar":
@@ -412,9 +422,8 @@ def discriminar_accion(scene, accion, argumentos):
         scene.end_replay = True
 
     elif accion == "moverse":
-        sleep(0.05)
         ID, new_x, new_y = argumentos.split(",")
-        scene.in_action = "Movimiento: {0} hacia: ({1},{2})".format(ID,new_|x,new_y)
+        scene.acciones[0] = "Movimiento: {0} hacia: ({1},{2})".format(ID,new_x,new_y)
         new_x = int(new_x)
         new_y = int(new_y)
 
@@ -438,15 +447,15 @@ def discriminar_accion(scene, accion, argumentos):
     elif accion == "disparar":
         origen, coor_x, coor_y, objetivo = argumentos.split(",")
         if objetivo == "None":
-            scene.in_action = "Disaparo fallido: {0} a ({1},{2})".format{origen, coor_x, coor_y}
+            scene.acciones[0] = "Disaparo fallido: {0} a ({1},{2})".format(origen, coor_x, coor_y)
         else:
-            scene.in_action = "Disaparo acertado: {0} a {1}".format{origen,objetivo}
+            scene.acciones[0] = "Disaparo acertado: {0} a {1}".format(origen,objetivo)
         jugador_origen = scene.players[origen]
         pass
 
     elif accion == "muerte":
         sleep(0.7)
-        scene.in_action = "Muere: {0}".format{argumentos}
+        scene.acciones[0] = "Muere: {0}".format(argumentos)
         jugador = scene.players[argumentos]
         scene.next_turn = jugador.morir()
         if scene.next_turn:
@@ -454,7 +463,7 @@ def discriminar_accion(scene, accion, argumentos):
 
     elif accion == "colision":
         sleep(0.7)
-        scene.in_action = "Colisiona: {0}".format{argumentos}
+        scene.acciones[0] = "Colisiona: {0}".format(argumentos)
         jugador = scene.players[argumentos]
         scene.next_turn = jugador.morir()
         if scene.next_turn:
@@ -463,7 +472,7 @@ def discriminar_accion(scene, accion, argumentos):
 
     elif accion == "desconectado":
         sleep(0.5)
-        scene.in_action = "Se ha desconectado: {0}".format{argumentos}
+        scene.acciones[0] = "Se ha desconectado: {0}".format(argumentos)
         del scene.players[argumentos]
         scene.next_turn = True
 

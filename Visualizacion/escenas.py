@@ -9,7 +9,8 @@ HEIGHT = 480
 FULLSCREEN = False
 MOUSE = True
 
-fuente = pygame.font.Font("data/fuentes/PressStart2P.ttf", 10)
+fuente1 = pygame.font.Font("data/fuentes/kenvector_future.ttf", 15)
+fuente2 = pygame.font.Font("data/fuentes/kenvector_future_thin.ttf", 10)
 
 pygame.mouse.set_visible(MOUSE)
 
