@@ -64,6 +64,10 @@ class Inicio(Scene):
 
         if self.start_replay:
             pygame.mixer.music.stop()
+            sfx_path = os.path.join("data", "sfx", "game_showmenu.wav")
+            pygame.mixer.Sound(sfx_path).play()
+            sleep(1)
+        
             self.director.change_scene(Principal(self.director,
                                                  self.players,
                                                  self.replay))
@@ -104,6 +108,7 @@ class Principal(Scene):
         musica_path = os.path.join(
             "data", "music", "Arabesque(Main theme).mp3")
         pygame.mixer.music.load(musica_path)
+        pygame.mixer.music.set_volume(0.4)
         pygame.mixer.music.play(100, 0.0)
 
         # Datos dibujo
@@ -177,6 +182,7 @@ class Estadisticas(Scene):
         musica_path = os.path.join(
             "data", "music", "Victory and Respite(end).mp3")
         pygame.mixer.music.load(musica_path)
+        pygame.mixer.music.set_volume(0.8)
         pygame.mixer.music.play(0, 0.0)
 
     def on_update(self):
@@ -250,7 +256,8 @@ class Jugador(pygame.sprite.Sprite):
 
     def aparecer(self, (coor_x, coor_y)):
         """ Coloca un jugador en las coordenadas de cuadrilla x, y."""
-
+        sleep(0.05)
+        
         self.visible = 0
         self.image = self.images[self.visible]
 
@@ -264,8 +271,8 @@ class Jugador(pygame.sprite.Sprite):
 
     def mostrar(self, screen):
         """ Muestra en pantalla el sprite del jugador."""
-        if self.visible != -1:
-            screen.blit(self.image, self.rect)
+        
+        screen.blit(self.image, self.rect)
 
     def mover(self, direccion):
         """ Cambia la posicion de un jugador hacia la direccion dada."""
@@ -308,7 +315,11 @@ class Jugador(pygame.sprite.Sprite):
         if self.visible == 0:
             self.visible += 1
             flag = False
-            print "musica",
+
+            # SFX
+            explosion = "explosion{0}.wav".format(choice(("1","2","3","4")))
+            sfx_path = os.path.join("data", "sfx", explosion)
+            pygame.mixer.Sound(sfx_path).play()
 
         elif self.visible == 1:
             self.visible += 1
