@@ -120,6 +120,9 @@ class Principal(Scene):
         self.replay=replay
         self.players=dict_players
 
+        # HUD
+        self.sprites_UI = list()
+        
         # Musica
         musica_path=os.path.join(
             "data", "music", "Arabesque(Main theme).mp3")
@@ -299,12 +302,17 @@ class Jugador(pygame.sprite.Sprite):
         screen.blit(self.image, self.rect)
 
     def mostrar_marcador(self, screen, coor_x, coor_y):
-        """ Muestra informacion del jugador en una tabla. """
 
+        """ Muestra informacion del jugador en una tabla. """
         sprite = pygame.transform.scale(self.image, (15,15))
+
         nombre = fuenteM.render(self.ID, 0, (255, 255, 255))
+        vidas = fuenteVidas.render("x"+str(self.vidas),0,(240, 240, 240))
+
         screen.blit(sprite, (coor_x, coor_y))
-        screen.blit(nombre, (coor_x+25, coor_y))
+        screen.blit(vidas, (coor_x+16, coor_y))
+        screen.blit(nombre, (coor_x+50, coor_y))
+
 
     def mover(self, direccion):
         """ Cambia la posicion de un jugador hacia la direccion dada."""

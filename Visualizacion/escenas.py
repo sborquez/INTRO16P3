@@ -13,6 +13,8 @@ fuenteXL = pygame.font.Font("data/fuentes/kenvector_future.ttf", 40)
 fuenteL = pygame.font.Font("data/fuentes/kenvector_future.ttf", 25)
 fuenteM = pygame.font.Font("data/fuentes/kenvector_future.ttf", 15)
 fuenteS = pygame.font.Font("data/fuentes/kenvector_future_thin.ttf", 10)
+fuenteVidas = pygame.font.Font("data/fuentes/PressStart2P.ttf", 10)
+
 
 pygame.mouse.set_visible(MOUSE)
 
