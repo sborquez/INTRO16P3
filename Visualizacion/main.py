@@ -5,7 +5,7 @@ from pygame.locals import *
 from escenas import *
 from time import sleep
 
-TITULO = "Intro 2016"
+TITULO = "Infobatallas Espaciales"
 
 #  Constantes de tamanhos para dibujar.
 SPACESHIPS = 45
@@ -95,7 +95,7 @@ class Inicio(Scene):
                                0, (255, 255, 255))
         fullscreen = fuenteS.render("F - fullscreen",
                                0, (255, 255, 255))
-        
+          
         screen.blit(salir, (20, 10))
         screen.blit(fullscreen, (20, 20))
 
