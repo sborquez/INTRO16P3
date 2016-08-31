@@ -9,7 +9,7 @@ HEIGHT = 480
 FULLSCREEN = False
 MOUSE = True
 
-fuenteXL = pygame.font.Font("data/fuentes/kenvector_future.ttf", 40)
+fuenteXL = pygame.font.Font("data/fuentes/PressStart2P.ttf", 40)
 fuenteL = pygame.font.Font("data/fuentes/kenvector_future.ttf", 25)
 fuenteM = pygame.font.Font("data/fuentes/kenvector_future.ttf", 15)
 fuenteS = pygame.font.Font("data/fuentes/kenvector_future_thin.ttf", 10)
