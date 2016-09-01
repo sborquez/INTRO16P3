@@ -1,10 +1,11 @@
 import socket
-import botdummy
+from botdummy import *
 import numpy
 
 IP = "localhost"
 PORT = 0000
-NJ = 3      #Numero de jugadores
+NJ = 2     #Numero de jugadores
+
 
 """
     Funciones utilizadas:
@@ -23,7 +24,6 @@ def conectar(server):
     conexiones_entrantes = dict()
     while( len (conexiones_entrantes) < NJ ):
         socket_o, socket_info = server.accept()
-        socket_o.send("Ingrese nombre usuario\n")
         nombre_usuario = socket_o.recv(1024)
         conexiones_entrantes[ nombre_usuario ] = (socket_o,socket_info)
         print "Conexion exitosa!"
@@ -37,7 +37,7 @@ def spawn_all( battlefield , conexiones_entrantes ):
         socket_o = conexiones_entrantes[jugador][0]
         x, y = spawn( battlefield )
         stats[ jugador ] =(3,3,(x,y)) #vidas, y turnos restantes
-        battlefield[x][y] = jugador
+        battlefield[x][y] = 912
         print jugador," ha sido situado en "+str(x)+","+str(y)
         socket_o.send(str(x)+","+str(y))
     return stats
@@ -73,8 +73,8 @@ servidor.listen(NJ)
 print "Esperando Conexiones"
 conexiones_entrantes = conectar(servidor)
 stats = spawn_all( battlefield, conexiones_entrantes )
-
-juego = 1
+print stats, "\n-------\n", conexiones_entrantes
+juego = 0
 
 while ( juego ):
     for jugador in conexiones_entrantes:
