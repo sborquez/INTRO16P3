@@ -19,4 +19,9 @@ def evaluar_movimiento( battlefield, coordenada ):
     elif ( battlefield[x][y] == 0 ): return "Movimiento efectivo en  "+battlefield[x][y]
     else: elif ( battlefield[x][y] != 0 ): return "Choque"
 
-
+def actualizar_matriz(battlefield, coordenada, user):
+    x,y = int(coordenada[0]), int(coordenada[1])
+    if (validar_coordenada(battlefield, coordenada) and battlefield[x][y]==0):
+        battlefield[x][y]=user
+    else:
+        return "Error de actualizacion"
