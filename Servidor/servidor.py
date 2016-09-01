@@ -1,7 +1,10 @@
 import socket
 import botdummy
 import numpy
-import threading
+
+IP = "localhost"
+PORT = 0000
+NJ = 3      #Numero de jugadores
 
 """
     Funciones utilizadas:
@@ -18,7 +21,7 @@ import threading
 
 def conectar(server):
     conexiones_entrantes = dict()
-    while( len (conexiones_entrantes) < 3 ):
+    while( len (conexiones_entrantes) < NJ ):
         socket_o, socket_info = server.accept()
         socket_o.send("Ingrese nombre usuario\n")
         nombre_usuario = socket_o.recv(1024)
@@ -31,11 +34,12 @@ def conectar(server):
 def spawn_all( battlefield , conexiones_entrantes ):
     stats = dict()
     for jugador in conexiones_entrantes:
-        x, y = spawn(battlefield)
+        socket_o = conexiones_entrantes[jugador][0]
+        x, y = spawn( battlefield )
         stats[ jugador ] =(3,3,(x,y)) #vidas, y turnos restantes
         battlefield[x][y] = jugador
         print jugador," ha sido situado en "+str(x)+","+str(y)
-        conexiones_entrantes[jugador][0].send(str(x)+","+str(y))
+        socket_o.send(str(x)+","+str(y))
     return stats
 
 """
@@ -63,9 +67,9 @@ def spawn_all( battlefield , conexiones_entrantes ):
 
 battlefield = numpy.tile(0,(20,20))
 servidor = socket.socket()
-servidor.bind( ('',0 ) )
+servidor.bind( (IP,PORT ) )
 print servidor.getsockname()
-servidor.listen(2)
+servidor.listen(NJ)
 print "Esperando Conexiones"
 conexiones_entrantes = conectar(servidor)
 stats = spawn_all( battlefield, conexiones_entrantes )
@@ -74,15 +78,18 @@ juego = 1
 
 while ( juego ):
     for jugador in conexiones_entrantes:
+        socket_o = conexiones_entrantes[jugador][0]
         print "Alertando a ", jugador
-        conexiones_entrantes[jugador].send("amenazas: \n")
+        socket_o.send("amenazas: \n")
+        
         for amenaza in  estimar_amenaza(stats[jugador[2]], battlefield):
-            conexiones_entrantes[jugador][0].send( str(amenaza)+"\n" )
-        conexiones_entrantes[jugador][0].send("fin\n")
+            socket_o.send( str(amenaza)+"\n" )
+        
+        socket_o.send("fin\n")
         print "Esperando movimiento de ", jugador
-        mensaje_recibido = conexiones_entrantes[jugador][0].recv(1024)
+        mensaje_recibido = socket_o.recv(1024)
         #Validar movimiento y actualizar matriz
-        mensaje_recibido = conexiones_entrantes[jugador][0].recv(1024)
+        mensaje_recibido = socket_o.recv(1024)
         #Validar disparo y actualizar matriz
         
 
