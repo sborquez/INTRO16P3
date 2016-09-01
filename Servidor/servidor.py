@@ -1,5 +1,6 @@
 import socket
-import dummy_bot
+import botdummy
+import numpy
 import threading
 
 """
@@ -15,7 +16,7 @@ import threading
 
 """
 
-def conectar():
+def conectar(server):
     conexiones_entrantes = dict()
     while( len (conexiones_entrantes) < 3 ):
         socket_o, socket_info = server.accept()
@@ -62,11 +63,11 @@ def spawn_all( battlefield , conexiones_entrantes ):
 
 battlefield = numpy.tile(0,(20,20))
 servidor = socket.socket()
-servidor.bind( (' ',0 ) )
+servidor.bind( ('',0 ) )
 print servidor.getsockname()
 servidor.listen(2)
 print "Esperando Conexiones"
-conexiones_entrantes = conectar()
+conexiones_entrantes = conectar(servidor)
 stats = spawn_all( battlefield, conexiones_entrantes )
 
 juego = 1
@@ -75,7 +76,7 @@ while ( juego ):
     for jugador in conexiones_entrantes:
         print "Alertando a ", jugador
         conexiones_entrantes[jugador].send("amenazas: \n")
-        for amenaza in  estimar_amenaza (stats[jugador[2], battlefield):
+        for amenaza in  estimar_amenaza(stats[jugador[2]], battlefield):
             conexiones_entrantes[jugador][0].send( str(amenaza)+"\n" )
         conexiones_entrantes[jugador][0].send("fin\n")
         print "Esperando movimiento de ", jugador
