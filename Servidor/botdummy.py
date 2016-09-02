@@ -50,6 +50,7 @@ def estimar_amenaza ( posicion,battlefield ):
             else:
                 if ( battlefield [0][ periodico ( posicion[i]+j ) ] == 1 ):
                     amenazas.append( amenaza (j) )
+    return [1,2,3]
     return amenazas
 
 def spawn( battlefield ):

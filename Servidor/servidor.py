@@ -4,7 +4,7 @@ import numpy
 
 IP = "localhost"
 PORT = 0000
-NJ = 2     #Numero de jugadores
+NJ = 1     #Numero de jugadores
 
 
 """
@@ -74,24 +74,22 @@ print "Esperando Conexiones"
 conexiones_entrantes = conectar(servidor)
 stats = spawn_all( battlefield, conexiones_entrantes )
 print stats, "\n-------\n", conexiones_entrantes
-juego = 0
+juego = 1
 
 while ( juego ):
     for jugador in conexiones_entrantes:
         socket_o = conexiones_entrantes[jugador][0]
         print "Alertando a ", jugador
-        socket_o.send("amenazas: \n")
+        socket_o.send("amenazas")
+        posicion = stats[jugador][2]
+        for amenaza in  estimar_amenaza(posicion, battlefield):
+            socket_o.send( str(amenaza) )
         
-        for amenaza in  estimar_amenaza(stats[jugador[2]], battlefield):
-            socket_o.send( str(amenaza)+"\n" )
-        
-        socket_o.send("fin\n")
+        socket_o.send("fin")
         print "Esperando movimiento de ", jugador
-        mensaje_recibido = socket_o.recv(1024)
+        #mensaje_recibido = socket_o.recv(1024)
         #Validar movimiento y actualizar matriz
-        mensaje_recibido = socket_o.recv(1024)
+        #mensaje_recibido = socket_o.recv(1024)
         #Validar disparo y actualizar matriz
-        
-
 servidor.close()
 
