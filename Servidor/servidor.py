@@ -4,7 +4,7 @@ import numpy
 
 IP = "localhost"
 PORT = 0000
-NJ = 1     #Numero de jugadores
+NJ = 2     #Numero de jugadores
 
 
 """
@@ -66,7 +66,7 @@ def spawn_all( battlefield , conexiones_entrantes ):
 
 
 battlefield = numpy.tile(0,(20,20))
-servidor = socket.socket()
+servidor = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
 servidor.bind( (IP,PORT ) )
 print servidor.getsockname()
 servidor.listen(NJ)
@@ -91,5 +91,6 @@ while ( juego ):
         #Validar movimiento y actualizar matriz
         #mensaje_recibido = socket_o.recv(1024)
         #Validar disparo y actualizar matriz
+    break
 servidor.close()
 

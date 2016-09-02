@@ -5,7 +5,7 @@ import numpy
 battlefield = numpy.tile(0,(20,20))
 
 #LOGIN
-cliente = socket.socket()
+cliente = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
 IP = raw_input("ingrese la ip ")
 PORT = input("ingrese el puerto ")
 cliente.connect( (IP ,PORT ) )
@@ -20,6 +20,7 @@ while (juego):
     if ( mensaje == "amenazas"):
         amenazas = list()
         while (1):
+            print mensaje
             mensaje = cliente.recv(1024)
             if (mensaje == "fin"):
                 break;
