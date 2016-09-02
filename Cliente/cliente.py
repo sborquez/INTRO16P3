@@ -17,16 +17,10 @@ mensaje = cliente.recv(1024)
 juego = 1
 while (juego):
     mensaje = cliente.recv(1024)
-    if ( mensaje == "amenazas"):
-        amenazas = list()
-        while (1):
-            print mensaje
-            mensaje = cliente.recv(1024)
-            if (mensaje == "fin"):
-                break;
-            amenazas.append( mensaje )
+    if ( mensaje[0] == "a"):
+        amenazas = mensaje
     print amenazas
-    break
+    x = input()
      #EN BASE A LA LISTA AMENAZAS, TOMAR UNA DECISION
     
     #ESCOGER UN MOVIMIENTO
