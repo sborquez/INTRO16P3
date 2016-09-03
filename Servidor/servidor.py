@@ -1,6 +1,7 @@
 import socket
 from botdummy import *
 import numpy
+import random
 
 IP = "localhost"
 PORT = 0000
@@ -19,13 +20,19 @@ NJ = 1     #Numero de jugadores
     a cada jugador
 
 """
+def generar_id(conexiones_entrantes):
+    while (1):
+        id = random.randint(0,100)
+        if not ( id in conexiones_entrantes) :
+            return id
 
 def conectar(server):
     conexiones_entrantes = dict()
     while( len (conexiones_entrantes) < NJ ):
         socket_o, socket_info = server.accept()
         nombre_usuario = socket_o.recv(1024)
-        conexiones_entrantes[ nombre_usuario ] = (socket_o,socket_info)
+        id = generar_id( conexiones_entrantes )
+        conexiones_entrantes[ id ] = (socket_o,socket_info,nombre_usuario)
         print "Conexion exitosa!"
     print "Todos se han conectado"
     return conexiones_entrantes
@@ -33,11 +40,12 @@ def conectar(server):
 
 def spawn_all( battlefield , conexiones_entrantes ):
     stats = dict()
-    for jugador in conexiones_entrantes:
-        socket_o = conexiones_entrantes[jugador][0]
+    for id in conexiones_entrantes:
+        socket_o = conexiones_entrantes[id][0]
+        jugador = conexiones_entrantes[id][2]
         x, y = spawn( battlefield )
-        stats[ jugador ] =(3,3,(x,y)) #vidas, y turnos restantes
-        battlefield[x][y] = 912
+        stats[ id ] =(jugador,3,3,(x,y)) #nombre,vidas, y turnos restantes
+        battlefield[x][y] = id
         print jugador," ha sido situado en "+str(x)+","+str(y)
         socket_o.send(str(x)+","+str(y))
     return stats
@@ -53,7 +61,7 @@ def spawn_all( battlefield , conexiones_entrantes ):
     y el valor es una tupla con las vidas, los turnos restantes, 
     y una tupla coordenadas.
     >>> stats
-    {'nombre_jugador':(vidas, turnos restantes,(x,y))}
+    {'id':(nombre_jugador,vidas, turnos restantes,(x,y))}
 
     battlefield es un np.array con valores 0 indicando espacios vacios, 
     y en los espacios en que estan situados los jugadores estan marcados 
@@ -78,16 +86,13 @@ print stats, "\n-------\n", conexiones_entrantes
 juego = 1
 
 while ( juego ):
-    for jugador in conexiones_entrantes:
-        socket_o = conexiones_entrantes[jugador][0]
+    for id in conexiones_entrantes:
+        jugador = conexiones_entrantes[id][2]
+        socket_o = conexiones_entrantes[id][0]
         print "Alertando a ", jugador
-        posicion = stats[jugador][2]
+        posicion = stats[id][3]
         socket_o.send( estimar_amenaza(posicion, battlefield) )
-        print "Esperando movimiento de ", jugador
-        #mensaje_recibido = socket_o.recv(1024)
-        #Validar movimiento y actualizar matriz
-        #mensaje_recibido = socket_o.recv(1024)
-        #Validar disparo y actualizar matriz
-    x =input()
+        print "Esperando accion de ", jugador
+        mensaje_recibido = socket_o.recv(1024)
 servidor.close()
 

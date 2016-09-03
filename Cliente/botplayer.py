@@ -20,25 +20,21 @@ def amenaza ( valor ):
     l = [3,3,2,2,1]
     return l [ abs ( valor ) -1 ]
 
-def mover ( posicion, battlefield ):
+def mover ( posicion ):
     
     delta = escoger(3)
-    battlefield[ posicion[0], posicion[1] ] = 0
-    
     if ( random.randint(0,1) ):
         posicion = posicion[0],periodico(posicion[1]+delta)
-        battlefield[ posicion[0], posicion[1] ] = 1
-        return posicion,battlefield
+        return posicion
         
     posicion = periodico( posicion[0]+1 ), posicion[1]
-    battlefield[ posicion[0], posicion[1] ] = 1
-    return posicion,battlefield
+    return posicion
 
-def disparar ( amenaza, posicion ):
+def disparar ( amenaza ):
     delta = escoger( amenaza )
     if( random.randint(0,1) ):
-        return posicion[0]+delta
-    return posicion[1]+delta
+        return delta,0 
+    return 0,delta
 
 def estimar_amenaza ( posicion,battlefield ):
     amenazas = "a"
@@ -57,4 +53,3 @@ def spawn( battlefield ):
         x , y = random.randint(0,19), random.randint(0,19)
         if ( battlefield[x][y] == 0 ):
             return x,y
-
