@@ -4,6 +4,13 @@ import random
 from botplayer import *
 battlefield = numpy.tile(0,(20,20))
 
+#Funcion que recibe la posición que asigna el servidor para aparecer en el mapa
+
+def spawn():                                          
+    mensaje = cliente.recv(1024)
+    posicion = mensaje.split(",")
+    return int(posicion[0]), int(posicion[1])
+
 #LOGIN
 cliente = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
 IP = raw_input("ingrese la ip ")
@@ -12,17 +19,17 @@ cliente.connect( (IP ,PORT ) )
 usuario = raw_input( "Ingrese nombre de usuario:" )
 cliente.send( usuario )
 
-#SPAWN
-mensaje = cliente.recv(1024)
-posicion = mensaje.split(",")
-print posicion
-posicion_x = int(posicion[0])
-posicion_y = int(posicion[1])
-battlefield[posicion_x][posicion_y] = 1
+#SPAWN INICIAL
+posicion = spawn()
 
 juego = 1
 while (juego):
+    #RECIBIR ORDEN DEL SERVIDOR, Y EN BASE A ESO ACTUALIZAR NUESTRO ESTADO Y RESPONDER
+
     mensaje = cliente.recv(1024)
+
+    #SI RECIBE UNA AMENAZA ESTAMOS OK, SE PROSIGUE CON ATACAR Y LUEGO MOVERSE
+
     if ( mensaje[0] == "a"):
         amenazas = mensaje
     #EN BASE A LA LISTA AMENAZAS, TOMAR UNA DECISION
@@ -32,4 +39,6 @@ while (juego):
     #ENVIAR MOVIMIENTO
     cliente.send(str(disparo_x)+","+str(disparo_y)+"-"+str(posicion_x)+","+str(posicion_y) )
     
+    #IF MUERTO --> RE-SPAWN
+    #IF GAME OVER --> BREAK    
 cliente.close()

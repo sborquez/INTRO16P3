@@ -84,7 +84,7 @@ conexiones_entrantes = conectar(servidor)
 stats = spawn_all( battlefield, conexiones_entrantes )
 print stats, "\n-------\n", conexiones_entrantes
 juego = 1
-
+log = list()
 while ( juego ):
     for id in conexiones_entrantes:
         jugador = conexiones_entrantes[id][2]

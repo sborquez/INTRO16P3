@@ -47,9 +47,3 @@ def estimar_amenaza ( posicion,battlefield ):
                 if ( battlefield [0][ periodico ( posicion[i]+j ) ] == 1 ):
                     amenazas+="-"+str( amenaza (j) )
         return amenazas
-
-def spawn( battlefield ):
-    while (1):
-        x , y = random.randint(0,19), random.randint(0,19)
-        if ( battlefield[x][y] == 0 ):
-            return x,y
