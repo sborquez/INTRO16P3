@@ -5,7 +5,7 @@ import random
 
 IP = "localhost"
 PORT = 0000
-NJ = 1     #Numero de jugadores
+NJ = 2   #Numero de jugadores
 
 
 """
@@ -27,12 +27,14 @@ def generar_id(conexiones_entrantes):
             return id
 
 def conectar(server):
+    log.append("juego:cargar")
     conexiones_entrantes = dict()
     while( len (conexiones_entrantes) < NJ ):
         socket_o, socket_info = server.accept()
         nombre_usuario = socket_o.recv(1024)
         id = generar_id( conexiones_entrantes )
         conexiones_entrantes[ id ] = (socket_o,socket_info,nombre_usuario)
+        log.append("conectado:"+str(id))
         print "Conexion exitosa!"
     print "Todos se han conectado"
     return conexiones_entrantes
@@ -46,16 +48,17 @@ def spawn_all( battlefield , conexiones_entrantes ):
         x, y = spawn( battlefield )
         stats[ id ] =(jugador,3,3,(x,y)) #nombre,vidas, y turnos restantes
         battlefield[x][y] = id
+        log.append("aparecer:"+str(id)+","+str(x)+","+str(y))
         print jugador," ha sido situado en "+str(x)+","+str(y)
         socket_o.send(str(x)+","+str(y))
     return stats
 
 """
     Estructuras utilizadas:
-    conexiones entrantes es un diccionario cuyas llaves son el nombre del jugador, 
-    y el valor es una tupla con un objeto socket y una tupla de ip, puerto.
+    conexiones entrantes es un diccionario cuyas llaves son el id del jugador, 
+    y el valor es una tupla con un objeto socket,una tupla de ip, puerto, y el nombre del jugador.
     >>> conexiones_entrantes
-    {'nombre jugador':( socket_jugador, ( ip,puerto ))}
+    {'id':( socket_jugador, ( ip,puerto ),nombre_jugador)}
     
     stats es un diccionario cuyas llaves son el nombre del jugador, 
     y el valor es una tupla con las vidas, los turnos restantes, 
@@ -65,15 +68,15 @@ def spawn_all( battlefield , conexiones_entrantes ):
 
     battlefield es un np.array con valores 0 indicando espacios vacios, 
     y en los espacios en que estan situados los jugadores estan marcados 
-    por sus respectivos nombres de jugador.
+    por sus respectivos id de jugador.
     >>> battlefield
     [[0,0,0],
-     ['nombre_jugador_1',0,0],
-     [0,nombre_jugador_2,0]]
+     ['id_jugador_1',0,0],
+     [0,id_jugador_2,0]]
 
 """
 
-
+log = list()
 battlefield = numpy.tile(0,(20,20))
 servidor = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
 servidor.bind( (IP,PORT ) )
@@ -82,17 +85,21 @@ servidor.listen(NJ)
 print "Esperando Conexiones"
 conexiones_entrantes = conectar(servidor)
 stats = spawn_all( battlefield, conexiones_entrantes )
-print stats, "\n-------\n", conexiones_entrantes
+print stats, "\n-------\n", conexiones_entrantes,"\n--------\n",battlefield
 juego = 1
-log = list()
+log.append("juego:comenzar")
 while ( juego ):
     for id in conexiones_entrantes:
         jugador = conexiones_entrantes[id][2]
         socket_o = conexiones_entrantes[id][0]
+        log.append("alertar:",str(id))
         print "Alertando a ", jugador
         posicion = stats[id][3]
         socket_o.send( estimar_amenaza(posicion, battlefield) )
         print "Esperando accion de ", jugador
         mensaje_recibido = socket_o.recv(1024)
+        disparo = (mensaje_recibido.split("-")[0]).split(",")
+        posicion = (mensaje_recibido.split("-")[1]).split(",")
+        battlefield[int(posicion[0]) ][int(posicion[1]) ] = id
 servidor.close()
-
+log.append("juego:terminar")
