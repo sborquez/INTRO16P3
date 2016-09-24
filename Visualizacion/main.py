@@ -438,6 +438,9 @@ class Jugador(pygame.sprite.Sprite):
         # TODO
 
         pass
+    def ganar_vida(self):
+        """ Le suma una vida al jugador."""
+        self.vida += 1
 
     def quitar_vida(self):
         """ Le resta una vida al jugador."""
@@ -601,13 +604,15 @@ def discriminar_accion(scene, accion, argumentos):
     # TODO
     elif accion == "disparar":
         origen, coor_x, coor_y, objetivo = argumentos.split(",")
+        jugador_origen = scene.players[origen]
         if objetivo == "None":
             scene.acciones[0] = "Disaparo fallido: {0} a ({1},{2})".format(
                 origen, coor_x, coor_y)
         else:
+            jugador_origen.ganar_vida()
             scene.acciones[0] = "Disaparo acertado: {0} a {1}".format(
                 origen, objetivo)
-        jugador_origen = scene.players[origen]
+            
         pass
 
     elif accion == "muerte":
