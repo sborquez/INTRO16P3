@@ -5,7 +5,7 @@ from pygame.locals import *
 from escenas import *
 from time import sleep
 
-TITULO = "Infobatallas Espaciales"
+TITULO = "Speis Guars"
 
 #  Constantes de tamanhos para dibujar.
 SPACESHIPS = 45
@@ -38,7 +38,13 @@ MAX_vidas = 5
 
 class Inicio(Scene):
 
-    """ Ventana de inicio del juego"""
+    """ Ventana de inicio del juego.
+        Campos:
+           background:      (image) Imagen de fondo.
+           start_replay:    (bool) Comenzar a reproducir el replay.
+           replay:          (list(string)) Lineas del archivo log.
+           players:         (dict((ID:Jugador)) Contiene objetos Jugadores.
+           colortxt:        (list(int,int, int))Color del texto en RGB."""
 
     def __init__(self, director, path_log):
         """Parametros.
@@ -119,7 +125,19 @@ class Inicio(Scene):
 class Principal(Scene):
 
     """ Aqui se muestra toda la accion, se lee el log, se ven
-        los jugadores, sfx, movimientos, etc."""
+        los jugadores, sfx, movimientos, etc.
+        Campos:
+            director:        (MainFrame), manipulador del juego.
+            background:      (image) Imagen de fondo.
+            replay:          (list(string)) Lineas del archivo log.
+            linea:           (string) Linea leida actual de replay.
+            next_turn:       (bool) Indica si se va ha leer una nueva linea.
+            players:         (dict((ID:Jugador)) Contiene objetos Jugadores.
+            colortxt:        (list(int,int, int))Color del texto en RGB.
+            end_replay:      (bool) Indica si ha terminado el replay.
+            acciones:        (list(strings) Pila de informacion ya leida.
+            turnos_restantes:(int)turnos restantes para que termine el juego.
+    """
 
     def __init__(self, director, dict_players, replay):
         """ Parametros:
@@ -228,7 +246,12 @@ class Principal(Scene):
 class Estadisticas(Scene):
     # TODO
 
-    """ Ventana final del juego, muestra los resultados, tablas, etc."""
+    """ Ventana final del juego, muestra los resultados, tablas, etc.
+        Campos:
+            director:        (MainFrame), manipulador del juego.
+            background:      (image) Imagen de fondo.
+            players:         (dict((ID:Jugador)) Contiene objetos Jugadores.
+    """
 
     def __init__(self, director, dict_players):
         """ Parametros:
@@ -277,7 +300,16 @@ class Estadisticas(Scene):
 
 class Jugador(pygame.sprite.Sprite):
 
-    """ Informacion de un jugador """
+    """ Informacion de un jugador.
+        Campos:
+            ID:                 (string) Identidicador del jugador.
+            alerta:             (int) Estado de alerta.
+            vidas:              (int) Cantidad de vidas.
+            battlefieldpos_x:   (int) Posicion x de la matriz del juego.
+            battlefieldpos_y:   (int) Posicion y de la matriz del juego.
+            orientacion:        (int) Grados de orientacion, norte=0.
+            images:             (list(images))Sprites de una nave.
+            visible:            (int) indice, sprite de jugador."""
 
     def __init__(self, ID):
         """Parametros:
@@ -285,13 +317,12 @@ class Jugador(pygame.sprite.Sprite):
 
         pygame.sprite.Sprite.__init__(self)
         # Datos jugador.
-        self.ID = ID                # (string) Identidicador del jugador.
-        self.alerta = 0             # (int) Estado de alerta.
-        self.vidas = 2              # (int) Cantidad de vidas.
-        self.battlefieldpos_x = 0   # (int) Posicion x de la matriz del juego.
-        self.battlefieldpos_y = 0   # (int) Posicion y de la matriz del juego.
-        self.orientacion = 0        # (int) Grados de orientacion, norte=0.
-        self.visible = True         # (boll)Mostrar la nave en pantalla.
+        self.ID = ID
+        self.alerta = 0
+        self.vidas = 2
+        self.battlefieldpos_x = 0
+        self.battlefieldpos_y = 0
+        self.orientacion = 0
 
         # Datos dibujo.
         idspaceship = randint(0, SPACESHIPS-1)
@@ -401,20 +432,25 @@ class Jugador(pygame.sprite.Sprite):
             self.rect.centery = new_y
 
     def disparar(self, direccion):
+        """ La nave dispara a la direccion dada.
+            Parametros:
+                - direccion: (tupla), direccion a la que se disparo."""
         # TODO
 
         pass
 
     def quitar_vida(self):
+        """ Le resta una vida al jugador."""
         self.vidas -= 1
 
     def morir(self):
+        """ La nave explota, y luego desparece."""
         if self.visible == 0:
             self.visible += 1
             flag = False
 
             # SFX
-            explosion = "explosion{0}.wav".format(choice(("1", "2", "3", "4")))
+            explosion = "explosion{0}.wav".format(choice("1234"))
             sfx_path = os.path.join("data", "sfx", explosion)
             pygame.mixer.Sound(sfx_path).play()
 
@@ -464,7 +500,9 @@ class Bala(pygame.sprite.Sprite):
 # ------------------------
 
 def cargar_sprite(path, escala=ESCALA):
-
+    """ Carga imagenes para sprites.
+        Parametros:
+            escala: (float) escala de conversion."""
     image = load_image(path, True)
 
     width, height = image.get_size()
@@ -475,6 +513,7 @@ def cargar_sprite(path, escala=ESCALA):
 
 
 def dibujar_cuadricula(screen):
+    """ Dibuja el tablero."""
     cuadrado = BATTLEFIELDSIZE / BATTLEFIELDDIVISIONS
     coor_x = BATTLEFIELDINICIO[0]
     coor_y = BATTLEFIELDINICIO[1]
@@ -492,6 +531,11 @@ def dibujar_cuadricula(screen):
 
 
 def transformar_coordenadas(coor_x, coor_y):
+    """ Transforma coordenadas de tablero a coordenadas de pygame.
+        Paramatros:
+            -coor_x: (int) coordenada x de tablero.
+            -coor_y: (int) coordenada y de tablero.
+    """
     cuadrado = BATTLEFIELDSIZE / BATTLEFIELDDIVISIONS
     new_x = BATTLEFIELDINICIO[0]+(coor_x*cuadrado)+(cuadrado/2)
     new_y = BATTLEFIELDINICIO[1]+(coor_y*cuadrado)+(cuadrado/2)
@@ -512,7 +556,11 @@ def cargar_jugadores(log):
 
 
 def discriminar_accion(scene, accion, argumentos):
-    """ Por cada comando del logfile, determina que accion tomar."""
+    """ Por cada comando del logfile, determina que accion tomar.
+        Parametros:
+            accion:     (string) accion leida del logfile-replay.
+            argumentos: (string) argumentos correspondientes a la accion.
+    """
 
     if accion == "aparecer":
         sleep(0.05)
