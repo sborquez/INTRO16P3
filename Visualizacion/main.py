@@ -235,10 +235,8 @@ class Principal(Scene):
         coor_y = 150
         coor_x = 20
         for ide, jugador in self.players.items():
-            if jugador.vidas <= 0:
+            if not jugador.sigue_vivo():
                 continue
-            if jugador.laser.fue_disparado():
-                jugador.laser.mostrar_tablero(screen)
             jugador.mostrar_tablero(screen)
             jugador.mostrar_marcador(screen, coor_x, coor_y)
             coor_y += 18
@@ -246,8 +244,8 @@ class Principal(Scene):
                 coor_y = 150
                 coor_x = 180
         for ide, jugador in self.players.items():
-            if jugador.laser.fue_disparado():
-                jugador.laser.mostrar_tablero(screen)
+            if jugador.ha_disparado():
+                jugador.mostrar_disparo(screen)
 
 
 class Estadisticas(Scene):
@@ -300,7 +298,6 @@ class Estadisticas(Scene):
 
         # TODO
         screen.blit(self.background, (0, 0))
-        pass
 
 
 # Clases de sprites.
@@ -376,7 +373,26 @@ class Jugador(pygame.sprite.Sprite):
         self.rect.centerx = 0
         self.rect.centery = 0
 
+    def ha_disparado(self):
+        """ Revisa si se a disparado en este turno. """
+        return self.laser.fue_disparado()
+
+    def mostrar_disparo(self, screen):
+        """ Muestra la Bala en pantalla. """
+        self.laser.mostrar_tablero(screen)
+
+    def sigue_vivo(self):
+        """ Revisa si el jugador aun tiene vidas. """
+        if self.vidas <= 0:
+            return False
+        return True
+
     def sound_fx(self, sfx_path_list, volumen):
+        """ Reproduce un efecto de sonido.
+            Parametros:
+                -sfx_path:  (list(string)) elementos del path
+                -volumen:   (float) volumen de reproduccion (0 a 1)
+        """
         sfx_path = os.path.join(*sfx_path_list)
         sfx = pygame.mixer.Sound(sfx_path)
         sfx.set_volume(volumen)
@@ -458,8 +474,9 @@ class Jugador(pygame.sprite.Sprite):
     def disparar(self, coor_x, coor_y, objetivo):
         """ La nave dispara a la direccion dada.
             Parametros:
-                - direccion: (tupla), direccion a la que se disparo."""
-        # TODO
+                - direccion: (tupla), direccion a la que se disparo.
+        """
+
         if round(self.__disparo, 3) >= 1.00:
             if objetivo != "None":
                 self.ganar_vida()
@@ -470,15 +487,14 @@ class Jugador(pygame.sprite.Sprite):
             return True
 
         elif round(self.__disparo, 3) > 0.50:
-            self.laser.rotatezoom()
-            pass
+            self.laser.rotate()
 
         elif round(self.__disparo, 3) == 0.50:
             # SFX
             self.visible = 0
             laser = "laser{0}.wav".format(choice("123"))
             self.sound_fx(["data", "sfx", laser], 0.2)
-            self.laser.disparo_a(int(coor_x),int(coor_y))
+            self.laser.disparo_a(int(coor_x), int(coor_y))
             self.laser.cambio_disparado()
 
         elif round(self.__disparo, 3) > 0.00:
@@ -524,33 +540,24 @@ class Jugador(pygame.sprite.Sprite):
         self.image = self.images[self.visible]
         return flag
 
-    def cambiar_alerta(self, cambio):
-        # TODO
-        pass
-
-# TODO
-
 
 class Bala(pygame.sprite.Sprite):
 
-    """ Objeto que representara a los disparos.
+    """ Representa a un disparo de una nave.
         Campos:
-            self.imagen_master = cargar_sprite(path, ESCALA*1.5)
-        self.image = cargar_sprite(path)
-        self.rect = self.image.get_rect()
-        self.rect.centerx = 0
-        self.rect.centery = 0
-
-        self.battlefieldpos_x = 0
-        self.battlefieldpos_y = 0
-        self.orientacion = 0
-        self.zoom = 1.0
-        self.disparado = 0 """
+            imagen_master:      (image) Imagen original de la Bala.
+            image:              (image) Imagen rotada de la Bala.
+            battlefieldpos_x:   (int)   Posicion x en tablero.
+            battlefieldpos_y:   (int)   Posicion y en tablero.
+            orientacion:        (int)   grado de orientacion para rotar.
+            disparado:          (int/bool) Indica si la bala se muetra.
+    """
 
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
 
         # Datos dibujo
+        # Sprites
         path = os.path.join("data", "sprites", "Laser", "Laser.png")
         self.imagen_master = cargar_sprite(path, ESCALA*1.5)
         self.image = cargar_sprite(path)
@@ -558,35 +565,44 @@ class Bala(pygame.sprite.Sprite):
         self.rect.centerx = 0
         self.rect.centery = 0
 
+        # Posicion
         self.battlefieldpos_x = 0
         self.battlefieldpos_y = 0
+
+        # Orientacion
         self.orientacion = 0
-        self.zoom = 1.0
+
+        # Estado
         self.disparado = 0
 
     def cambio_disparado(self):
+        """ Cambia si se muestra la bala."""
         self.disparado += 1
         self.disparado %= 2
 
     def fue_disparado(self):
+        """ Pregunta si la bala debe mostrarse."""
         return bool(self.disparado)
 
-    def rotatezoom(self):
+    def rotate(self):
+        """ Gira la imagen de la bala."""
         self.orientacion += 120
         self.orientacion %= 360
-        if round(self.zoom, 2) >= 2.0:
-            self.zoom = 1.0
-        self.zoom += 0.02
         self.image = pygame.transform.rotate(
             self.imagen_master, self.orientacion)
         new_x, new_y = transformar_coordenadas(self.battlefieldpos_x,
-                                                   self.battlefieldpos_y)
+                                               self.battlefieldpos_y)
         self.rect = self.image.get_rect()
 
         self.rect.centerx = new_x
-        self.rect.centery = new_y   
+        self.rect.centery = new_y
 
     def disparo_a(self, coor_x, coor_y):
+        """ Determinar el lugar del tablero donde fue disparada.
+            Parametros:
+                coor_x:   (int)   Posicion x en tablero.
+                coor__y:   (int)   Posicion y en tablero.
+        """
         # Se determina su posicion y orientacion inicial.
         self.battlefieldpos_x = coor_x
         self.battlefieldpos_y = coor_y
@@ -599,6 +615,7 @@ class Bala(pygame.sprite.Sprite):
         self.rect.centery = new_y
 
     def mostrar_tablero(self, screen):
+        """ Dibuja el disparo en la pantalla.s """
         screen.blit(self.image, self.rect)
 
 # ------------------------
@@ -649,10 +666,14 @@ def transformar_coordenadas(coor_x, coor_y):
     return new_x, new_y
 
 
-def cargar_jugadores(log):
+def cargar_jugadores(replay):
+    """ Carga los jugadores desde log/replay a un diccionario.
+        Parametros:
+            -replay:    (list(string)) Lineas del log.
+    """
     jugadores = dict()
     while True:
-        linea = log.pop(0)
+        linea = replay.pop(0)
         accion, argumentos = linea.strip().split(":")
         if accion == "conectado":
             jugadores[argumentos] = Jugador(argumentos)
