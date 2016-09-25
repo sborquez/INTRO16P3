@@ -237,12 +237,17 @@ class Principal(Scene):
         for ide, jugador in self.players.items():
             if jugador.vidas <= 0:
                 continue
+            if jugador.laser.fue_disparado():
+                jugador.laser.mostrar_tablero(screen)
             jugador.mostrar_tablero(screen)
             jugador.mostrar_marcador(screen, coor_x, coor_y)
             coor_y += 18
             if coor_y + 30 >= HEIGHT:
                 coor_y = 150
                 coor_x = 180
+        for ide, jugador in self.players.items():
+            if jugador.laser.fue_disparado():
+                jugador.laser.mostrar_tablero(screen)
 
 
 class Estadisticas(Scene):
@@ -311,7 +316,8 @@ class Jugador(pygame.sprite.Sprite):
             battlefieldpos_y:   (int) Posicion y de la matriz del juego.
             orientacion:        (int) Grados de orientacion, norte=0.
             images:             (list(images))Sprites de una nave.
-            visible:            (int) indice, sprite de jugador."""
+            visible:            (int) indice, sprite de jugador.
+            laser:              (Bala)objero bala de la nave."""
 
     def __init__(self, ID):
         """Parametros:
@@ -328,6 +334,7 @@ class Jugador(pygame.sprite.Sprite):
 
         # Porcetanje cargado de disparo. Animacion disparo
         self.__disparo = 0.0
+        self.laser = Bala()
 
         # Datos dibujo.
         idspaceship = randint(0, SPACESHIPS-1)
@@ -335,14 +342,14 @@ class Jugador(pygame.sprite.Sprite):
                                                    "sprites",
                                                    "Players")))
         spaceship1_path = os.path.join("data",
-                                      "sprites",
-                                      "Players",
-                                      spaceship)
+                                       "sprites",
+                                       "Players",
+                                       spaceship)
 
         spaceship2_path = os.path.join("data",
-                                      "sprites",
-                                      "Shooting",
-                                      spaceship)
+                                       "sprites",
+                                       "Shooting",
+                                       spaceship)
 
         explotion1_path = os.path.join("data",
                                        "sprites",
@@ -448,41 +455,40 @@ class Jugador(pygame.sprite.Sprite):
             self.rect.centerx = new_x
             self.rect.centery = new_y
 
-    def disparar(self, coor_x,coor_y,objetivo):
+    def disparar(self, coor_x, coor_y, objetivo):
         """ La nave dispara a la direccion dada.
             Parametros:
                 - direccion: (tupla), direccion a la que se disparo."""
         # TODO
-        if round(self.__disparo,3) >= 1.00:
+        if round(self.__disparo, 3) >= 1.00:
             if objetivo != "None":
                 self.ganar_vida()
             else:
-                self.sound_fx(["data", "sfx", "miss.ogg"],1)
+                self.sound_fx(["data", "sfx", "miss.ogg"], 1)
             self.__disparo = 0.0
+            self.laser.cambio_disparado()
             return True
 
-        elif round(self.__disparo,3) > 0.50:
-            if int(self.__disparo*50)%2:
-                pass
-            else:
-                pass
+        elif round(self.__disparo, 3) > 0.50:
+            self.laser.rotatezoom()
+            pass
 
-        elif round(self.__disparo,3) == 0.50:
+        elif round(self.__disparo, 3) == 0.50:
             # SFX
             self.visible = 0
             laser = "laser{0}.wav".format(choice("123"))
-            self.sound_fx(["data", "sfx", laser],0.2)
+            self.sound_fx(["data", "sfx", laser], 0.2)
+            self.laser.disparo_a(int(coor_x),int(coor_y))
+            self.laser.cambio_disparado()
 
-
-        elif round(self.__disparo,3) > 0.00:
-            if int(self.__disparo*50)%2:
+        elif round(self.__disparo, 3) > 0.00:
+            if int(self.__disparo*50) % 2:
                 self.visible = 0
             else:
                 self.visible = 3
         else:
             # SFX
-            self.sound_fx(["data", "sfx", "charging.wav"],0.2)
-
+            self.sound_fx(["data", "sfx", "charging.wav"], 0.2)
 
         self.image = self.images[self.visible]
         self.__disparo = round(self.__disparo + 0.005, 3)
@@ -491,13 +497,12 @@ class Jugador(pygame.sprite.Sprite):
     def ganar_vida(self):
         """ Le suma una vida al jugador."""
         self.vidas += 1
-        self.sound_fx(["data", "sfx", "lifeup.wav"],0.3)
-
+        self.sound_fx(["data", "sfx", "lifeup.wav"], 0.3)
 
     def quitar_vida(self):
         """ Le resta una vida al jugador."""
         self.vidas -= 1
-        self.sound_fx(["data", "sfx", "lifedown.ogg"],1)
+        self.sound_fx(["data", "sfx", "lifedown.ogg"], 1)
 
     def morir(self):
         """ La nave explota, y luego desparece."""
@@ -507,8 +512,7 @@ class Jugador(pygame.sprite.Sprite):
 
             # SFX
             explosion = "explosion{0}.wav".format(choice("1234"))
-            self.sound_fx(["data", "sfx", explosion],1)
-
+            self.sound_fx(["data", "sfx", explosion], 1)
 
         elif self.visible == 1:
             self.visible += 1
@@ -529,31 +533,78 @@ class Jugador(pygame.sprite.Sprite):
 
 class Bala(pygame.sprite.Sprite):
 
-    """ Objeto que representara a los disparos. """
+    """ Objeto que representara a los disparos.
+        Campos:
+            self.imagen_master = cargar_sprite(path, ESCALA*1.5)
+        self.image = cargar_sprite(path)
+        self.rect = self.image.get_rect()
+        self.rect.centerx = 0
+        self.rect.centery = 0
+
+        self.battlefieldpos_x = 0
+        self.battlefieldpos_y = 0
+        self.orientacion = 0
+        self.zoom = 1.0
+        self.disparado = 0 """
 
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
 
         # Datos dibujo
-        self.imagenes = list()
-        for laser in os.listdir(os.path.join("data",
-                                             "sprites",
-                                             "Laser")):
-            path = os.path.join("data",
-                                "sprites",
-                                "Laser",
-                                laser)
-
-            self.imagenes.append(load_image(path, True))
-
-        self.rect = self.imagenes[0].get_rect()
+        path = os.path.join("data", "sprites", "Laser", "Laser.png")
+        self.imagen_master = cargar_sprite(path, ESCALA*1.5)
+        self.image = cargar_sprite(path)
+        self.rect = self.image.get_rect()
         self.rect.centerx = 0
         self.rect.centery = 0
 
+        self.battlefieldpos_x = 0
+        self.battlefieldpos_y = 0
+        self.orientacion = 0
+        self.zoom = 1.0
+        self.disparado = 0
+
+    def cambio_disparado(self):
+        self.disparado += 1
+        self.disparado %= 2
+
+    def fue_disparado(self):
+        return bool(self.disparado)
+
+    def rotatezoom(self):
+        self.orientacion += 120
+        self.orientacion %= 360
+        if round(self.zoom, 2) >= 2.0:
+            self.zoom = 1.0
+        self.zoom += 0.02
+        self.image = pygame.transform.rotate(
+            self.imagen_master, self.orientacion)
+        new_x, new_y = transformar_coordenadas(self.battlefieldpos_x,
+                                                   self.battlefieldpos_y)
+        self.rect = self.image.get_rect()
+
+        self.rect.centerx = new_x
+        self.rect.centery = new_y   
+
+    def disparo_a(self, coor_x, coor_y):
+        # Se determina su posicion y orientacion inicial.
+        self.battlefieldpos_x = coor_x
+        self.battlefieldpos_y = coor_y
+        self.orientacion = 0
+
+        # Se transforman las coordenas del tablero a las de pygame.
+        new_x, new_y = transformar_coordenadas(coor_x, coor_y)
+        self.rect = self.image.get_rect()
+        self.rect.centerx = new_x
+        self.rect.centery = new_y
+
+    def mostrar_tablero(self, screen):
+        screen.blit(self.image, self.rect)
 
 # ------------------------
 # DEFINICION DE FUNCIONES
 # ------------------------
+
 
 def cargar_sprite(path, escala=ESCALA):
     """ Carga imagenes para sprites.
@@ -654,11 +705,10 @@ def discriminar_accion(scene, accion, argumentos):
         else:
             scene.next_turn = True
 
-    # TODO
     elif accion == "disparar":
         origen, coor_x, coor_y, objetivo = argumentos.split(",")
         jugador_origen = scene.players[origen]
-        scene.next_turn = jugador_origen.disparar(coor_x,coor_y,objetivo)     
+        scene.next_turn = jugador_origen.disparar(coor_x, coor_y, objetivo)
         if objetivo == "None":
             scene.acciones[0] = "Disaparo fallido: {0} a ({1},{2})".format(
                 origen, coor_x, coor_y)
