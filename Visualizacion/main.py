@@ -235,6 +235,8 @@ class Principal(Scene):
         coor_y = 150
         coor_x = 20
         for ide, jugador in self.players.items():
+            if jugador.vidas <= 0:
+                continue
             jugador.mostrar_tablero(screen)
             jugador.mostrar_marcador(screen, coor_x, coor_y)
             coor_y += 18
@@ -324,14 +326,22 @@ class Jugador(pygame.sprite.Sprite):
         self.battlefieldpos_y = 0
         self.orientacion = 0
 
+        # Porcetanje cargado de disparo. Animacion disparo
+        self.__disparo = 0.0
+
         # Datos dibujo.
         idspaceship = randint(0, SPACESHIPS-1)
         spaceship = choice(os.listdir(os.path.join("data",
                                                    "sprites",
                                                    "Players")))
-        spaceship_path = os.path.join("data",
+        spaceship1_path = os.path.join("data",
                                       "sprites",
                                       "Players",
+                                      spaceship)
+
+        spaceship2_path = os.path.join("data",
+                                      "sprites",
+                                      "Shooting",
                                       spaceship)
 
         explotion1_path = os.path.join("data",
@@ -343,13 +353,14 @@ class Jugador(pygame.sprite.Sprite):
                                        "sprites",
                                        "Explotions",
                                        "Explosion2.png")
-        # Sprites de una nave. [principal, explosion 1 , explosion 2]
-        self.images = list() 
-        self.images.append(cargar_sprite(spaceship_path))
+        # Sprites de una nave. [principal, explosion 1 , explosion 2,shooting]
+        self.images = list()
+        self.images.append(cargar_sprite(spaceship1_path))
         self.images.append(cargar_sprite(explotion1_path))
         self.images.append(cargar_sprite(explotion2_path))
+        self.images.append(cargar_sprite(spaceship2_path))
 
-        # Sprite visible de los 3.
+        # Sprite visible de los 4.
         self.visible = 0
 
         # Informacion de pygame.Sprite
@@ -357,6 +368,12 @@ class Jugador(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.centerx = 0
         self.rect.centery = 0
+
+    def sound_fx(self, sfx_path_list, volumen):
+        sfx_path = os.path.join(*sfx_path_list)
+        sfx = pygame.mixer.Sound(sfx_path)
+        sfx.set_volume(volumen)
+        sfx.play()
 
     def aparecer(self, (coor_x, coor_y)):
         """ Coloca un jugador en las coordenadas de cuadrilla x, y.
@@ -431,20 +448,56 @@ class Jugador(pygame.sprite.Sprite):
             self.rect.centerx = new_x
             self.rect.centery = new_y
 
-    def disparar(self, direccion):
+    def disparar(self, coor_x,coor_y,objetivo):
         """ La nave dispara a la direccion dada.
             Parametros:
                 - direccion: (tupla), direccion a la que se disparo."""
         # TODO
+        if round(self.__disparo,3) >= 1.00:
+            if objetivo != "None":
+                self.ganar_vida()
+            else:
+                self.sound_fx(["data", "sfx", "miss.ogg"],1)
+            self.__disparo = 0.0
+            return True
 
-        pass
+        elif round(self.__disparo,3) > 0.50:
+            if int(self.__disparo*50)%2:
+                pass
+            else:
+                pass
+
+        elif round(self.__disparo,3) == 0.50:
+            # SFX
+            self.visible = 0
+            laser = "laser{0}.wav".format(choice("123"))
+            self.sound_fx(["data", "sfx", laser],0.2)
+
+
+        elif round(self.__disparo,3) > 0.00:
+            if int(self.__disparo*50)%2:
+                self.visible = 0
+            else:
+                self.visible = 3
+        else:
+            # SFX
+            self.sound_fx(["data", "sfx", "charging.wav"],0.2)
+
+
+        self.image = self.images[self.visible]
+        self.__disparo = round(self.__disparo + 0.005, 3)
+        return False
+
     def ganar_vida(self):
         """ Le suma una vida al jugador."""
-        self.vida += 1
+        self.vidas += 1
+        self.sound_fx(["data", "sfx", "lifeup.wav"],0.3)
+
 
     def quitar_vida(self):
         """ Le resta una vida al jugador."""
         self.vidas -= 1
+        self.sound_fx(["data", "sfx", "lifedown.ogg"],1)
 
     def morir(self):
         """ La nave explota, y luego desparece."""
@@ -454,8 +507,8 @@ class Jugador(pygame.sprite.Sprite):
 
             # SFX
             explosion = "explosion{0}.wav".format(choice("1234"))
-            sfx_path = os.path.join("data", "sfx", explosion)
-            pygame.mixer.Sound(sfx_path).play()
+            self.sound_fx(["data", "sfx", explosion],1)
+
 
         elif self.visible == 1:
             self.visible += 1
@@ -605,15 +658,13 @@ def discriminar_accion(scene, accion, argumentos):
     elif accion == "disparar":
         origen, coor_x, coor_y, objetivo = argumentos.split(",")
         jugador_origen = scene.players[origen]
+        scene.next_turn = jugador_origen.disparar(coor_x,coor_y,objetivo)     
         if objetivo == "None":
             scene.acciones[0] = "Disaparo fallido: {0} a ({1},{2})".format(
                 origen, coor_x, coor_y)
         else:
-            jugador_origen.ganar_vida()
             scene.acciones[0] = "Disaparo acertado: {0} a {1}".format(
                 origen, objetivo)
-            
-        pass
 
     elif accion == "muerte":
         sleep(0.7)
@@ -649,7 +700,6 @@ def discriminar_accion(scene, accion, argumentos):
 
     else:
         print accion, argumentos
-        pass
 
 # -----
 # MAIN

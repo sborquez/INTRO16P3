@@ -32,6 +32,7 @@ conectado:bot29
 juego:comenzar
 aparecer:bot0,0,0
 aparecer:bot1,11,0
+disparar:bot0,5,3,None
 aparecer:bot2,17,9
 aparecer:bot3,9,3
 aparecer:bot4,4,4
@@ -68,8 +69,9 @@ moverse:bot0,0,19
 moverse:bot0,19,19
 moverse:bot9,0,0
 moverse:bot22,19,0
-muerte:bot13
-aparecer:bot13,1,2
+disparar:bot9,5,3,bot21
+muerte:bot21
+aparecer:bot21,1,2
 colision:bot3
 colision:bot5
 aparecer:bot3,0,4
