@@ -12,7 +12,6 @@ SPACESHIPS = 45
 BATTLEFIELDSIZE = 460.0
 BATTLEFIELDDIVISIONS = 20
 BATTLEFIELDINICIO = (351, 10)
-ESCALA = 4.0/BATTLEFIELDDIVISIONS
 
 # Constantes de giro de las naves.
 MOV = {"up": (0,  -1),
@@ -67,6 +66,7 @@ class Inicio(Scene):
         # players: Diccionario de clases Jugador (ID:Jugador).
         with open(path_log) as log:
             self.replay = log.readlines()
+            self.replay.pop(0)
         self.players = cargar_jugadores(self.replay)
 
         # Musica
@@ -204,7 +204,8 @@ class Principal(Scene):
     def on_event(self, event):
         """ Revisa si ocurrio un evento en el bucle principal.
             Parametros:
-                - event: Indica si se ha apretado 'espacio'."""
+                - event: Indica si se ha apretado 'espacio'.
+        """
 
         # TEST
         if event:
@@ -214,7 +215,8 @@ class Principal(Scene):
     def on_draw(self, screen):
         """ Refrescar datos en la pantalla.
             Parametros:
-                - screen: Ventana donde se dibuja."""
+                - screen: Ventana donde se dibuja.
+        """
 
         # Fondo
         screen.blit(self.background, (0, 0))
@@ -261,7 +263,8 @@ class Estadisticas(Scene):
     def __init__(self, director, dict_players):
         """ Parametros:
                 - director: Objeto MainFrame, manipulador del juego.
-                - dict_players: Diccionario de clases Jugador (ID:Jugador)."""
+                - dict_players: Diccionario de clases Jugador (ID:Jugador).
+        """
 
         Scene.__init__(self, director)
         # Informacion de escena
@@ -314,7 +317,8 @@ class Jugador(pygame.sprite.Sprite):
             orientacion:        (int) Grados de orientacion, norte=0.
             images:             (list(images))Sprites de una nave.
             visible:            (int) indice, sprite de jugador.
-            laser:              (Bala)objero bala de la nave."""
+            laser:              (Bala)objero bala de la nave.
+    """
 
     def __init__(self, ID):
         """Parametros:
@@ -325,8 +329,8 @@ class Jugador(pygame.sprite.Sprite):
         self.ID = ID
         self.alerta = 0
         self.vidas = 2
-        self.battlefieldpos_x = 0
-        self.battlefieldpos_y = 0
+        self.battlefieldpos_x = -1
+        self.battlefieldpos_y = -1
         self.orientacion = 0
 
         # Porcetanje cargado de disparo. Animacion disparo
@@ -370,8 +374,8 @@ class Jugador(pygame.sprite.Sprite):
         # Informacion de pygame.Sprite
         self.image = self.images[self.visible]
         self.rect = self.image.get_rect()
-        self.rect.centerx = 0
-        self.rect.centery = 0
+        self.rect.centerx = -100
+        self.rect.centery = -100
 
     def ha_disparado(self):
         """ Revisa si se a disparado en este turno. """
@@ -421,7 +425,8 @@ class Jugador(pygame.sprite.Sprite):
     def mostrar_tablero(self, screen):
         """ Muestra en pantalla el sprite del jugador.
             Paramteros:
-                -screen: Ventana donde se muestra el juego."""
+                -screen: Ventana donde se muestra el juego.
+        """
 
         screen.blit(self.image, self.rect)
 
@@ -431,7 +436,7 @@ class Jugador(pygame.sprite.Sprite):
                 -screen: superficie donde se dibuja.
                 -coor_x: coordenadas x de pygame.
                 -coor_y: coordenadas y de pygame.
-                """
+        """
         # Miniatura de la nave.
         sprite = pygame.transform.scale(self.image, (15, 15))
         nombre = fuenteM.render(self.ID, 0, (255, 255, 255))
@@ -444,7 +449,8 @@ class Jugador(pygame.sprite.Sprite):
     def mover(self, direccion):
         """ Cambia la posicion de un jugador hacia la direccion dada.
             Parametros:
-                direccion: string, indica si la nave sube, baja,izq o dere."""
+                direccion: string, indica si la nave sube, baja,izq o dere.
+        """
 
         # Mueve el sprite hasta llegar a la nueva coordenada de tablero.
         X, Y = MOV[direccion]
@@ -505,8 +511,8 @@ class Jugador(pygame.sprite.Sprite):
         else:
             # SFX
             self.sound_fx(["data", "sfx", "charging.wav"], 0.2)
-
-        self.image = self.images[self.visible]
+        self.image = pygame.transform.rotate(
+            self.images[self.visible], self.orientacion)
         self.__disparo = round(self.__disparo + 0.005, 3)
         return False
 
@@ -559,7 +565,7 @@ class Bala(pygame.sprite.Sprite):
         # Datos dibujo
         # Sprites
         path = os.path.join("data", "sprites", "Laser", "Laser.png")
-        self.imagen_master = cargar_sprite(path, ESCALA*1.5)
+        self.imagen_master = cargar_sprite(path, 1.5)
         self.image = cargar_sprite(path)
         self.rect = self.image.get_rect()
         self.rect.centerx = 0
@@ -623,10 +629,12 @@ class Bala(pygame.sprite.Sprite):
 # ------------------------
 
 
-def cargar_sprite(path, escala=ESCALA):
+def cargar_sprite(path, escala=1):
     """ Carga imagenes para sprites.
         Parametros:
-            escala: (float) escala de conversion."""
+            escala: (float) escala de conversion.
+    """
+    escala = 4.0/BATTLEFIELDDIVISIONS * escala
     image = load_image(path, True)
 
     width, height = image.get_size()
@@ -777,8 +785,34 @@ def discriminar_accion(scene, accion, argumentos):
 # -----
 
 if __name__ == "__main__":
-    # path = raw_input("Ingrese log: ")
-    path = "test.log"
+    logs = dict()
+    for log in os.listdir("logs"):
+        name, ext = os.path.splitext(log)
+        if ext == ".log":
+            try:
+                with open(os.path.join("logs", log), 'r') as replay:
+                    line = replay.readline()
+                    TITLE, DATA = line.strip().split(";")
+                    FECHA, HORA, TAMANHO = DATA.split("/")
+                    TAMANHO = int(TAMANHO)
+                    logs[name] = (
+                        os.path.join("logs", log), FECHA, HORA, TAMANHO)
+            except ValueError:
+                print "{0} NO tiene el formato correcto.".format(log)
+
+    print "Archivos encontrados:"
+    for log, (_, FECHA, HORA, TAMANHO) in logs.items():
+        print "\t> {0}:\t".format(log),
+        print "Fecha:{0}\tHora:{1}\tTamanho:{2}".format(FECHA, HORA, TAMANHO)
+
+    while True:
+        log = raw_input("Seleccione log: ")
+        try:
+            path, _, _, BATTLEFIELDDIVISIONS = logs[log]
+            break
+        except KeyError:
+            print "El archivo no existe."
+
     Main = MainFrame(TITULO)
     Main.change_scene(Inicio(Main, path))
     Main.loop()

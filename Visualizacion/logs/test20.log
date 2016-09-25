@@ -1,3 +1,4 @@
+#TITLE;FECHA/HORA/20
 juego:cargar
 conectado:bot0
 conectado:bot1
@@ -76,4 +77,12 @@ colision:bot3
 colision:bot5
 aparecer:bot3,0,4
 aparecer:bot5,0,8
+moverse:bot23,3,3
+disparar:bot23,0,8,bot5
+muerte:bot5
+aparecer:bot5,0,8
+moverse:bot9,0,0
+moverse:bot9,1,0
+moverse:bot9,2,0
+moverse:bot9,3,0
 juego:terminar
