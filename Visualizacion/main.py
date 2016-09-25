@@ -171,7 +171,7 @@ class Principal(Scene):
 
         # Musica
         musica_path = os.path.join(
-            "data", "music", "Arabesque(Main theme).mp3")
+            "data", "music", "Arabesque(Main theme).ogg")
         pygame.mixer.music.load(musica_path)
         pygame.mixer.music.set_volume(0.4)
         pygame.mixer.music.play(100, 0.0)
@@ -270,31 +270,112 @@ class Estadisticas(Scene):
 
         # Musica
         musica_path = os.path.join(
-            "data", "music", "Victory and Respite(end).mp3")
+            "data", "music", "Victory and Respite(end).ogg")
         pygame.mixer.music.load(musica_path)
         pygame.mixer.music.set_volume(0.8)
         pygame.mixer.music.play(0, 0.0)
 
     def on_update(self):
         """ Actualizar datos, cambia de escena si es necesario. """
-
         # TODO
         pass
 
     def on_event(self, event):
         """ Revisa si ocurrio un evento en el bucle principal. """
-
         # TODO
         if event:
-            pass
+            self.start_replay = True
 
     def on_draw(self, screen):
         """ Refrescar datos en la pantalla."""
 
         # TODO
-        screen.blit(self.background, (0, 0))
-        pass
+        self.info = dict()
+        with open(path_log) as log:
+            self.replay = log.readlines()
+        
+        # Agregamos los jugadores que ganaron en un diccionario
+        # info = dict (id:list(int veces_muerto, int colisiones, 
+        #              int disparos_efectivos, int disparos_fallidos))
+        for line in self.replay:
+            line = line.split(":")
+            if line[0] == "resultado":
+                self.info[line[1]] = [0,0,0,0]
 
+        #Volvemos a recorrer la lista para contar las muertes y todo
+        #lo necesario para hacer las estadisticas
+        for line in self.replay:
+            line = line.split(":")
+            
+            if linea[0] == "disparar":
+                data = linea[1].split(",")
+                if data[0] in self.info:
+                    if data[2] != "None":
+                        self.info[data[0]][2] += 1
+                    else:
+                        self.info[data[0]][3] += 1
+            
+            elif linea[0] == "colision":
+                if linea[1] in self.info:
+                    self.info[linea[0]][1] += 1
+                    self.info[linea[0]][0] += 1
+
+            elif linea[0] == "muerte":
+                if linea[0] in self.info:
+                    self.info[linea[0]][0] += 1
+        """
+        A la lista asociada a cada id_player se agrega un float efectividad, que corresponde 
+        a ser el porcentaje de efectividad de los disparos de cada jugador.
+        - efectividad negativa significa que falla mas tiros que los que acierta
+        Despues de este for, la estructura del diccionario de los jugadores ganadores queda
+        de la siguiente forma:
+        info = dict (id:list(int veces_muerto, int colisiones, int disparos_efectivos, 
+                    int disparos_fallidos, float efectividad_disparos))
+        """
+        for p_inf in self.info:
+            efectividad_disparos = (self.info[p_inf][2] - self.info[p_inf][3])
+            efectividad_disparos /= ((self.info[p_inf][2] + self.info[p_inf][3])*1.0)
+            efectividad_disparos *=100
+            efectividad_disparos = round(efectividad_disparos,1)
+            self.info[p_inf].append(efectividad_disparos)
+
+        ## Mostramos las estadisticas en la escena estadisticas
+        
+        screen.blit(self.background, (0, 0))
+
+        title = fuenteL.render("Estadisticas",
+                               0, (255, 255, 255))
+        screen.blit(title, (115, 40))
+        lin = 60
+        i=1
+        for plyr_inf in self.info:
+            temp_str = ""
+            if (i%7 == 1):
+                temp_str = "ID jugador: "+plyr_inf+"\n"
+                temporal = fuenteM.render(temp_str,
+                                    0, (255, 255, 255))
+            elif (i%7 == 2):
+                temp_str = "Muertes: "+str([self.info[plyr_inf][0])+"\n"
+                temporal = fuenteM.render(temp_str,
+                                    0, (255, 255, 255))
+            elif (i%7 == 3):
+                temp_str = "Colisiones: "+str([self.info[plyr_inf][1])+"\n"
+                temporal = fuenteM.render(temp_str,
+                                    0, (255, 255, 255))
+            elif (i%7 == 4):
+                temp_str = "Disparos acertados: "+str([self.info[plyr_inf][2])+"\n"
+                temporal = fuenteM.render(temp_str,
+                                    0, (255, 255, 255))
+            elif (i%7 == 5):
+                temp_str = "Disparos fallidos: "+str([self.info[plyr_inf][3])+"\n"
+                temporal = fuenteM.render(temp_str,
+                                    0, (255, 255, 255))
+            elif (i%7 == 6):
+                temp_str = "Efectividad : "+str([self.info[plyr_inf][4])+"%\n\n"
+                temporal = fuenteM.render(temp_str,
+                                    0, (255, 255, 255))            
+            screen.blit(temporal, (90, lin))
+            lin +=20
 
 # Clases de sprites.
 
