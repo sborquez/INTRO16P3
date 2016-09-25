@@ -135,7 +135,7 @@ class Principal(Scene):
             players:         (dict((ID:Jugador)) Contiene objetos Jugadores.
             colortxt:        (list(int,int, int))Color del texto en RGB.
             end_replay:      (bool) Indica si ha terminado el replay.
-            acciones:        (list(strings) Pila de informacion ya leida.
+            acciones:        (list(str) Pila de informacion ya leida.
             turnos_restantes:(int)turnos restantes para que termine el juego.
     """
 
@@ -164,10 +164,6 @@ class Principal(Scene):
         # players: Diccionario de clases Jugador (ID:Jugador).
         self.replay = replay
         self.players = dict_players
-
-        # HUD
-        # sin uso aun
-        self.sprites_UI = list()
 
         # Musica
         musica_path = os.path.join(
@@ -780,11 +776,9 @@ def discriminar_accion(scene, accion, argumentos):
     else:
         print accion, argumentos
 
-# -----
-# MAIN
-# -----
 
-if __name__ == "__main__":
+def buscar_logs():
+    """ Busca en el directorio logs, guarda los archivos en un diccionario."""
     logs = dict()
     for log in os.listdir("logs"):
         name, ext = os.path.splitext(log)
@@ -799,7 +793,18 @@ if __name__ == "__main__":
                         os.path.join("logs", log), FECHA, HORA, TAMANHO)
             except ValueError:
                 print "{0} NO tiene el formato correcto.".format(log)
+    return logs
 
+
+def elegir_partidas(logs):
+    """ Muestra los archivos encontrados, pide elegir uno para reproducir.
+        Parametros:
+            -logs:  (dict(name:(path,fecha,hora,tamanho)
+                        name:       (str)Nombre de la partida.
+                        path:       (str)ruta de la partida.
+                        fecha:      (str)fecha de la partida.
+                        hora:       (str)hora de la partida.
+                        tamanho:    (int)tamanho del tablero."""
     print "Archivos encontrados:"
     for log, (_, FECHA, HORA, TAMANHO) in logs.items():
         print "\t> {0}:\t".format(log),
@@ -808,10 +813,19 @@ if __name__ == "__main__":
     while True:
         log = raw_input("Seleccione log: ")
         try:
-            path, _, _, BATTLEFIELDDIVISIONS = logs[log]
-            break
+            path, _, _, tamanho = logs[log]
+            return path, tamanho
         except KeyError:
             print "El archivo no existe."
+
+# -----
+# MAIN
+# -----
+
+if __name__ == "__main__":
+
+    logs = buscar_logs()
+    path, BATTLEFIELDDIVISIONS = elegir_partidas(logs)
 
     Main = MainFrame(TITULO)
     Main.change_scene(Inicio(Main, path))
