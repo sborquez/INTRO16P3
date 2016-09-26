@@ -103,7 +103,7 @@ class Inicio(Scene):
             Parametros:
                 - event: Indica si se ha apretado 'espacio'."""
 
-        if event:
+        if event == pygame.K_SPACE:
             self.start_replay = True
 
     def on_draw(self, screen):
@@ -206,7 +206,7 @@ class Principal(Scene):
                 - event: Indica si se ha apretado 'espacio'."""
 
         # TEST
-        if event:
+        if event == pygame.K_SPACE:
             pygame.mixer.music.stop()
             self.end_replay = True
 
@@ -254,7 +254,8 @@ class Estadisticas(Scene):
                                         disparos_efectivos,
                                         disparos_fallidos,
                                         % de acierto,
-                                        % de muerte por colision,
+                                        % de muerte por colision
+            top:             (list) Lista ordenada (disparos_efectivos,vidas,jugador)
     """
 
     def __init__(self, director):
@@ -277,6 +278,8 @@ class Estadisticas(Scene):
 
         # Resultados de la partida.
         self.resultados = dict()
+        self.top = list()
+
         with open(director.path_log) as log:
             self.replay = log.readlines()
             # self.replay.pop(0)
@@ -284,7 +287,7 @@ class Estadisticas(Scene):
         while len(self.replay) > 0:
             try:
                 linea = self.replay.pop(0)
-                accion, argumentos = linea.split(":")
+                accion, argumentos = linea.strip().split(":")
                 # Agregamos los jugadores a resultados
                 if accion == "conectado":
                     self.resultados[argumentos] = [0, 0, 0, 0, 0, 0]
@@ -312,13 +315,21 @@ class Estadisticas(Scene):
 
         for jugador, resultados in self.resultados.items():
             porcentaje_aciertos = calcular_porcentaje(
-                                        resultados[3] + resultados[2],
-                                        resultados[2])
+                resultados[3] + resultados[2],
+                resultados[2])
             porcentaje_muerte_colision = calcular_porcentaje(
-                                             resultados[0],
-                                             resultados[1])
+                resultados[0],
+                resultados[1])
             self.resultados[jugador][4] = porcentaje_aciertos
             self.resultados[jugador][5] = porcentaje_muerte_colision
+            self.top.append((resultados[2], 
+                            resultados[2]-resultados[1]-resultados[0],
+                            jugador))
+            self.top.sort()
+            self.top.reverse()
+
+        self.primero_mostrando = 1
+        self.total_jugadores = len(self.top)
 
     def on_update(self):
         """ Actualizar datos, cambia de escena si es necesario. """
@@ -326,51 +337,61 @@ class Estadisticas(Scene):
 
     def on_event(self, event):
         """ Revisa si ocurrio un evento en el bucle principal. """
+        if event == pygame.K_DOWN:
+            if self.total_jugadores - self.primero_mostrando + 1 > 12:
+                self.primero_mostrando += 1
+        elif event == pygame.K_UP:
+            if self.primero_mostrando != 1:
+                self.primero_mostrando -= 1
 
     def on_draw(self, screen):
         """ Refrescar datos en la pantalla."""
         # Mostramos las estadisticas en la escena estadisticas
 
         screen.blit(self.background, (0, 0))
+        formato_h = "{0}  {1}                    {2}  {3}  {4}  {5}  {6}  {7}"
+        formato_id = "{0}  {1}"
 
-        title = fuenteL.render("Estadisticas",
-                               0, (255, 255, 255))
-        screen.blit(title, (115, 40))
-        lin = 60
-        i = 1
-        for plyr_inf in self.resultados:
-            temp_str = ""
-            if (i % 7 == 1):
-                temp_str = "ID jugador: "+plyr_inf+"\n"
-                temporal = fuenteM.render(temp_str,
-                                          0, (255, 255, 255))
-            elif (i % 7 == 2):
-                temp_str = "Muertes: "+str(self.resultados[plyr_inf][0])+"\n"
-                temporal = fuenteM.render(temp_str,
-                                          0, (255, 255, 255))
-            elif (i % 7 == 3):
-                temp_str = "Colisiones: " + \
-                    str(self.resultados[plyr_inf][1])+"\n"
-                temporal = fuenteM.render(temp_str,
-                                          0, (255, 255, 255))
-            elif (i % 7 == 4):
-                temp_str = "Disparos acertados: " + \
-                    str(self.resultados[plyr_inf][2])+"\n"
-                temporal = fuenteM.render(temp_str,
-                                          0, (255, 255, 255))
-            elif (i % 7 == 5):
-                temp_str = "Disparos fallidos: " + \
-                    str(self.resultados[plyr_inf][3])+"\n"
-                temporal = fuenteM.render(temp_str,
-                                          0, (255, 255, 255))
-            elif (i % 7 == 6):
-                temp_str = "Efectividad : " + \
-                    str(self.resultados[plyr_inf][4])+"%\n\n"
-                temporal = fuenteM.render(temp_str,
-                                          0, (255, 255, 255))
-            screen.blit(temporal, (90, lin))
-            lin += 20
+        title = fuenteL.render("Estadisticas", 0, (255, 255, 255))
+        screen.blit(title, (320, 40))
+        cabezera = fuenteM.render(formato_h.format("n", "ID", 
+                                                 "Aciertos", "Fallidos",
+                                                 "Muertes", "Colisiones", 
+                                                 "Eficiencia", "Accidentes"),
+                                                  0, (255, 255, 255))
+        screen.blit(cabezera, (40,80))
+        inicial = self.primero_mostrando
+        Y = 120
+        while Y < 480:
+            try:
+                jugador = self.top[inicial-1][2]
+            except IndexError:
+                continue
+            jugador_id = fuenteM.render(formato_id.format(inicial, jugador),
+                                        0, (255, 255, 255))
+            aciertos = fuenteM.render(str(self.resultados[jugador][2]),
+                                      0, (255, 255, 255))
+            fallidos = fuenteM.render(str(self.resultados[jugador][3]),
+                                      0, (255, 255, 255))
+            muertes = fuenteM.render(str(self.resultados[jugador][0]),
+                                     0, (255, 255, 255))
+            colisiones = fuenteM.render(str(self.resultados[jugador][1]),
+                                        0, (255, 255, 255))
+            eficiencia = fuenteM.render(str(self.resultados[jugador][4])+"%",
+                                        0, (255, 255, 255))
+            accidentes = fuenteM.render(str(self.resultados[jugador][5])+"%",
+                                        0, (255, 255, 255))
 
+            screen.blit(jugador_id, (40,Y))
+            screen.blit(aciertos, (200,Y))
+            screen.blit(fallidos, (300,Y))
+            screen.blit(muertes, (400,Y))
+            screen.blit(colisiones, (500,Y))
+            screen.blit(eficiencia, (610,Y))
+            screen.blit(accidentes, (730,Y))
+
+            inicial += 1
+            Y += 30
 # Clases de sprites.
 
 
