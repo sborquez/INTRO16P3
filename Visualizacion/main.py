@@ -862,15 +862,13 @@ def discriminar_accion(scene, accion, argumentos):
         del scene.players[argumentos]
         scene.next_turn = True
 
-    # TODO
-    elif accion == "resultado":
-        pass
-
     elif accion == "alertar":
         ID, nivel = argumentos.split(",")
         scene.players[ID].alerta = int(nivel)
+        scene.next_turn = True
 
     else:
+        scene.next_turn = True
         print accion, argumentos
 
 
