@@ -26,12 +26,13 @@ class MainFrame:
     
     """
 
-    def __init__(self, titulo, SW=WIDTH, SH=HEIGHT):
+    def __init__(self, titulo, path_log, SW=WIDTH, SH=HEIGHT):
         self.screen = pygame.display.set_mode((SW, SH))
         pygame.display.set_caption(titulo)
         self.scene = None
         self.quit_flag = False
         self.clock = pygame.time.Clock()
+        self.path_log = path_log
         
         if FULLSCREEN:
             pygame.display.toggle_fullscreen() 
@@ -41,9 +42,7 @@ class MainFrame:
  
         while not self.quit_flag:
             time = self.clock.tick(60)
-
-            space_pressed = False
-             
+            key_pressed = None
             # Eventos de Salida
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -54,10 +53,14 @@ class MainFrame:
                     if event.key == pygame.K_f:
                         pygame.display.toggle_fullscreen() 
                     if event.key == pygame.K_SPACE:
-                        space_pressed = True
+                        key_pressed = pygame.K_SPACE
+                    if event.key == pygame.K_UP:
+                        key_pressed = pygame.K_UP
+                    if event.key == pygame.K_DOWN:
+                        key_pressed = pygame.K_DOWN
             
             # detecta eventos
-            self.scene.on_event(space_pressed)
+            self.scene.on_event(key_pressed)
  
             # actualiza la escena
             self.scene.on_update()

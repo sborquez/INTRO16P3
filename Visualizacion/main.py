@@ -103,7 +103,7 @@ class Inicio(Scene):
             Parametros:
                 - event: Indica si se ha apretado 'espacio'."""
 
-        if event:
+        if event == pygame.K_SPACE:
             self.start_replay = True
 
     def on_draw(self, screen):
@@ -167,7 +167,7 @@ class Principal(Scene):
 
         # Musica
         musica_path = os.path.join(
-            "data", "music", "Arabesque(Main theme).mp3")
+            "data", "music", "Arabesque(Main theme).ogg")
         pygame.mixer.music.load(musica_path)
         pygame.mixer.music.set_volume(0.4)
         pygame.mixer.music.play(100, 0.0)
@@ -183,8 +183,7 @@ class Principal(Scene):
 
         # Si se termino de leer la partida, pasar a los resultados.
         if self.end_replay:
-            self.director.change_scene(Estadisticas(self.director,
-                                                    self.players))
+            self.director.change_scene(Estadisticas(self.director))
 
         # Si se termino de actualizar los datos de un turno, leer el siguiente.
         if self.next_turn:
@@ -204,7 +203,7 @@ class Principal(Scene):
         """
 
         # TEST
-        if event:
+        if event == pygame.K_SPACE:
             pygame.mixer.music.stop()
             self.end_replay = True
 
@@ -247,59 +246,156 @@ class Principal(Scene):
 
 
 class Estadisticas(Scene):
-    # TODO
 
     """ Ventana final del juego, muestra los resultados, tablas, etc.
         Campos:
-            director:        (MainFrame), manipulador del juego.
+            director:        (MainFrame) Manipulador del juego.
             background:      (image) Imagen de fondo.
-            players:         (dict((ID:Jugador)) Contiene objetos Jugadores.
+            resultados:      (dict(id:list()) Resultados de un jugador(id)
+                                    id: veces_muerto
+                                        colisiones,
+                                        disparos_efectivos,
+                                        disparos_fallidos,
+                                        % de acierto,
+                                        % de muerte por colision
+            top:             (list) Lista ordenada (disparos_efectivos,vidas,jugador)
     """
 
-    def __init__(self, director, dict_players):
+    def __init__(self, director):
         """ Parametros:
                 - director: Objeto MainFrame, manipulador del juego.
-                - dict_players: Diccionario de clases Jugador (ID:Jugador).
         """
 
         Scene.__init__(self, director)
-        # Informacion de escena
+        # Informacion de escena.
         # backgound: Imagen de fondo.
         background_path = os.path.join("data", "background", "resultados.jpg")
         self.background = load_image(background_path)
 
-        # Informacion del replay
-        # players: Diccionario de clases Jugador (ID:Jugador).
-        self.players = dict_players
-
-        # Musica
+        # Musica.
         musica_path = os.path.join(
-            "data", "music", "Victory and Respite(end).mp3")
+            "data", "music", "Victory and Respite(end).ogg")
         pygame.mixer.music.load(musica_path)
         pygame.mixer.music.set_volume(0.8)
         pygame.mixer.music.play(0, 0.0)
 
+        # Resultados de la partida.
+        self.resultados = dict()
+        self.top = list()
+
+        with open(director.path_log) as log:
+            self.replay = log.readlines()
+            self.replay.pop(0)
+
+        while len(self.replay) > 0:
+            try:
+                linea = self.replay.pop(0)
+                accion, argumentos = linea.strip().split(":")
+                # Agregamos los jugadores a resultados
+                if accion == "conectado":
+                    self.resultados[argumentos] = [0, 0, 0, 0, 0, 0]
+                elif accion == "disparar":
+                    jugador, _, _, objetivo = argumentos.split(",")
+                    if objetivo == "None":
+                        # Disparos fallidos.
+                        self.resultados[jugador][3] += 1
+                    else:
+                        # Disparos efectivos.
+                        self.resultados[jugador][2] += 1
+                elif accion == "colision":
+                    jugador = argumentos
+                    # Colisiones
+                    self.resultados[jugador][1] += 1
+                    # Muertes
+                    self.resultados[jugador][0] += 1
+                elif accion == "muerte":
+                    self.resultados[argumentos][0] += 1
+            except KeyError:
+                print "Archivo log posee incongruencias."
+
+        for jugador, resultados in self.resultados.items():
+            porcentaje_aciertos = calcular_porcentaje(
+                                            resultados[3] + resultados[2],
+                                            resultados[2])
+            porcentaje_muerte_colision = calcular_porcentaje(
+                                            resultados[0],
+                                            resultados[1])
+            self.resultados[jugador][4] = porcentaje_aciertos
+            self.resultados[jugador][5] = porcentaje_muerte_colision
+            self.top.append((resultados[2]-resultados[0],
+                             resultados[2],
+                            jugador))
+            self.top.sort()
+            self.top.reverse()
+
+        self.primero_mostrando = 1
+        self.total_jugadores = len(self.top)
+
     def on_update(self):
         """ Actualizar datos, cambia de escena si es necesario. """
-
-        # TODO
         pass
 
     def on_event(self, event):
         """ Revisa si ocurrio un evento en el bucle principal. """
-
-        # TODO
-        if event:
-            pass
+        if event == pygame.K_DOWN:
+            if self.total_jugadores - self.primero_mostrando + 1 > 12:
+                self.primero_mostrando += 1
+        elif event == pygame.K_UP:
+            if self.primero_mostrando != 1:
+                self.primero_mostrando -= 1
 
     def on_draw(self, screen):
         """ Refrescar datos en la pantalla."""
+        # Mostramos las estadisticas en la escena estadisticas
 
-        # TODO
         screen.blit(self.background, (0, 0))
+        formato_h = "{0}  {1}                    {2}  {3}  {4}  {5}  {6}  {7}"
+        formato_id = "{0}  {1}"
 
+        title = fuenteL.render("Estadisticas", 0, (255, 255, 255))
+        screen.blit(title, (320, 40))
+        cabezera = fuenteM.render(formato_h.format("n", "ID", 
+                                                 "Aciertos", "Fallidos",
+                                                 "Muertes", "Colisiones", 
+                                                 "Eficiencia", "Accidentes"),
+                                                  0, (255, 255, 255))
+        screen.blit(cabezera, (40,80))
+        inicial = self.primero_mostrando
+        Y = 120
+        while Y < 480:
+            try:
+                jugador = self.top[inicial-1][2]
+            except IndexError:
+                Y += 480
+                continue
+            jugador_id = fuenteM.render(formato_id.format(inicial, jugador),
+                                        0, (255, 255, 255))
+            aciertos = fuenteM.render(str(self.resultados[jugador][2]),
+                                      0, (255, 255, 255))
+            fallidos = fuenteM.render(str(self.resultados[jugador][3]),
+                                      0, (255, 255, 255))
+            muertes = fuenteM.render(str(self.resultados[jugador][0]),
+                                     0, (255, 255, 255))
+            colisiones = fuenteM.render(str(self.resultados[jugador][1]),
+                                        0, (255, 255, 255))
+            eficiencia = fuenteM.render(str(self.resultados[jugador][4])+"%",
+                                        0, (255, 255, 255))
+            accidentes = fuenteM.render(str(self.resultados[jugador][5])+"%",
+                                        0, (255, 255, 255))
+
+            screen.blit(jugador_id, (40,Y))
+            screen.blit(aciertos, (200,Y))
+            screen.blit(fallidos, (300,Y))
+            screen.blit(muertes, (400,Y))
+            screen.blit(colisiones, (500,Y))
+            screen.blit(eficiencia, (610,Y))
+            screen.blit(accidentes, (730,Y))
+
+            inicial += 1
+            Y += 30
 
 # Clases de sprites.
+
 
 class Jugador(pygame.sprite.Sprite):
 
@@ -357,6 +453,7 @@ class Jugador(pygame.sprite.Sprite):
                                        "sprites",
                                        "Explotions",
                                        "Explosion2.png")
+
         # Sprites de una nave. [principal, explosion 1 , explosion 2,shooting]
         self.images = list()
         self.images.append(cargar_sprite(spaceship1_path))
@@ -818,15 +915,21 @@ def elegir_partidas(logs):
         except KeyError:
             print "El archivo no existe."
 
+
+def calcular_porcentaje(total, porcion):
+    try:
+        return round((porcion/float(total))*100,1)
+    except ZeroDivisionError:
+        return 0.0
 # -----
 # MAIN
 # -----
 
 if __name__ == "__main__":
-
     logs = buscar_logs()
     path, BATTLEFIELDDIVISIONS = elegir_partidas(logs)
 
-    Main = MainFrame(TITULO)
+    Main = MainFrame(TITULO, path)
+
     Main.change_scene(Inicio(Main, path))
     Main.loop()
