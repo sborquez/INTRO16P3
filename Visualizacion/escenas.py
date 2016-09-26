@@ -26,12 +26,13 @@ class MainFrame:
     
     """
 
-    def __init__(self, titulo, SW=WIDTH, SH=HEIGHT):
+    def __init__(self, titulo, path_log, SW=WIDTH, SH=HEIGHT):
         self.screen = pygame.display.set_mode((SW, SH))
         pygame.display.set_caption(titulo)
         self.scene = None
         self.quit_flag = False
         self.clock = pygame.time.Clock()
+        self.path_log = path_log
         
         if FULLSCREEN:
             pygame.display.toggle_fullscreen() 

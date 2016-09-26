@@ -187,8 +187,7 @@ class Principal(Scene):
 
         # Si se termino de leer la partida, pasar a los resultados.
         if self.end_replay:
-            self.director.change_scene(Estadisticas(self.director,
-                                                    self.players))
+            self.director.change_scene(Estadisticas(self.director))
 
         # Si se termino de actualizar los datos de un turno, leer el siguiente.
         if self.next_turn:
@@ -244,141 +243,136 @@ class Principal(Scene):
 
 
 class Estadisticas(Scene):
-    # TODO
 
     """ Ventana final del juego, muestra los resultados, tablas, etc.
         Campos:
-            director:        (MainFrame), manipulador del juego.
+            director:        (MainFrame) Manipulador del juego.
             background:      (image) Imagen de fondo.
-            players:         (dict((ID:Jugador)) Contiene objetos Jugadores.
+            resultados:      (dict(id:list()) Resultados de un jugador(id)
+                                    id: veces_muerto
+                                        colisiones,
+                                        disparos_efectivos,
+                                        disparos_fallidos,
+                                        % de acierto,
+                                        % de muerte por colision,
     """
 
-    def __init__(self, director, dict_players):
+    def __init__(self, director):
         """ Parametros:
                 - director: Objeto MainFrame, manipulador del juego.
-                - dict_players: Diccionario de clases Jugador (ID:Jugador)."""
+        """
 
         Scene.__init__(self, director)
-        # Informacion de escena
+        # Informacion de escena.
         # backgound: Imagen de fondo.
         background_path = os.path.join("data", "background", "resultados.jpg")
         self.background = load_image(background_path)
 
-        # Informacion del replay
-        # players: Diccionario de clases Jugador (ID:Jugador).
-        self.players = dict_players
-
-        # Musica
+        # Musica.
         musica_path = os.path.join(
             "data", "music", "Victory and Respite(end).ogg")
         pygame.mixer.music.load(musica_path)
         pygame.mixer.music.set_volume(0.8)
         pygame.mixer.music.play(0, 0.0)
 
-        self.info = dict()
-        with open(path_log) as log:
+        # Resultados de la partida.
+        self.resultados = dict()
+        with open(director.path_log) as log:
             self.replay = log.readlines()
-        
-        # Agregamos los jugadores que ganaron en un diccionario
-        # info = dict (id:list(int veces_muerto, int colisiones, 
-        #              int disparos_efectivos, int disparos_fallidos))
-        for line in self.replay:
-            line = line.split(":")
-            if line[0] == "resultado":
-                self.info[line[1]] = [0,0,0,0]
+            # self.replay.pop(0)
 
-        #Volvemos a recorrer la lista para contar las muertes y todo
-        #lo necesario para hacer las estadisticas
-        for line in self.replay:
-            line = line.split(":")
-            
-            if linea[0] == "disparar":
-                data = linea[1].split(",")
-                if data[0] in self.info:
-                    if data[2] != "None":
-                        self.info[data[0]][2] += 1
+        while len(self.replay) > 0:
+            try:
+                linea = self.replay.pop(0)
+                accion, argumentos = linea.split(":")
+                # Agregamos los jugadores a resultados
+                if accion == "conectado":
+                    self.resultados[argumentos] = [0, 0, 0, 0, 0, 0]
+                elif accion == "disparar":
+                    jugador, _, _, objetivo = argumentos.split(",")
+                    if objetivo != "None":
+                        # Disparos fallidos.
+                        self.resultados[jugador][3] += 1
                     else:
-                        self.info[data[0]][3] += 1
-            
-            elif linea[0] == "colision":
-                if linea[1] in self.info:
-                    self.info[linea[0]][1] += 1
-                    self.info[linea[0]][0] += 1
+                        # Disparos efectivos.
+                        self.resultados[jugador][2] += 1
+                elif accion == "colision":
+                    jugador = argumentos
+                    # Colisiones
+                    self.resultados[jugador][1] += 1
+                    # Muertes
+                    self.resultados[jugador][0] += 1
+                elif accion == "muerte":
+                    if linea[0] in self.resultados:
+                        self.resultados[linea[0]][0] += 1
+                else:
+                    continue
+            except KeyError:
+                print "Archivo log posee incongruencias."
 
-            elif linea[0] == "muerte":
-                if linea[0] in self.info:
-                    self.info[linea[0]][0] += 1
-        """
-        A la lista asociada a cada id_player se agrega un float efectividad, que corresponde 
-        a ser el porcentaje de efectividad de los disparos de cada jugador.
-        - efectividad negativa significa que falla mas tiros que los que acierta
-        Despues de este for, la estructura del diccionario de los jugadores ganadores queda
-        de la siguiente forma:
-        info = dict (id:list(int veces_muerto, int colisiones, int disparos_efectivos, 
-                    int disparos_fallidos, float efectividad_disparos))
-        """
-        for p_inf in self.info:
-            efectividad_disparos = (self.info[p_inf][2] - self.info[p_inf][3])
-            efectividad_disparos /= ((self.info[p_inf][2] + self.info[p_inf][3])*1.0)
-            efectividad_disparos *=100
-            efectividad_disparos = round(efectividad_disparos,1)
-            self.info[p_inf].append(efectividad_disparos)
+        for jugador, resultados in self.resultados.items():
+            porcentaje_aciertos = calcular_porcentaje(
+                                        resultados[3] + resultados[2],
+                                        resultados[2])
+            porcentaje_muerte_colision = calcular_porcentaje(
+                                             resultados[0],
+                                             resultados[1])
+            self.resultados[jugador][4] = porcentaje_aciertos
+            self.resultados[jugador][5] = porcentaje_muerte_colision
 
     def on_update(self):
         """ Actualizar datos, cambia de escena si es necesario. """
-        # TODO
         pass
 
     def on_event(self, event):
         """ Revisa si ocurrio un evento en el bucle principal. """
-        # TODO
-        if event:
-            self.start_replay = True
 
     def on_draw(self, screen):
         """ Refrescar datos en la pantalla."""
+        # Mostramos las estadisticas en la escena estadisticas
 
-        # TODO
-        
-        ## Mostramos las estadisticas en la escena estadisticas
-        
         screen.blit(self.background, (0, 0))
 
         title = fuenteL.render("Estadisticas",
                                0, (255, 255, 255))
         screen.blit(title, (115, 40))
         lin = 60
-        i=1
-        for plyr_inf in self.info:
+        i = 1
+        for plyr_inf in self.resultados:
             temp_str = ""
-            if (i%7 == 1):
+            if (i % 7 == 1):
                 temp_str = "ID jugador: "+plyr_inf+"\n"
                 temporal = fuenteM.render(temp_str,
-                                    0, (255, 255, 255))
-            elif (i%7 == 2):
-                temp_str = "Muertes: "+str(self.info[plyr_inf][0])+"\n"
+                                          0, (255, 255, 255))
+            elif (i % 7 == 2):
+                temp_str = "Muertes: "+str(self.resultados[plyr_inf][0])+"\n"
                 temporal = fuenteM.render(temp_str,
-                                    0, (255, 255, 255))
-            elif (i%7 == 3):
-                temp_str = "Colisiones: "+str(self.info[plyr_inf][1])+"\n"
+                                          0, (255, 255, 255))
+            elif (i % 7 == 3):
+                temp_str = "Colisiones: " + \
+                    str(self.resultados[plyr_inf][1])+"\n"
                 temporal = fuenteM.render(temp_str,
-                                    0, (255, 255, 255))
-            elif (i%7 == 4):
-                temp_str = "Disparos acertados: "+str(self.info[plyr_inf][2])+"\n"
+                                          0, (255, 255, 255))
+            elif (i % 7 == 4):
+                temp_str = "Disparos acertados: " + \
+                    str(self.resultados[plyr_inf][2])+"\n"
                 temporal = fuenteM.render(temp_str,
-                                    0, (255, 255, 255))
-            elif (i%7 == 5):
-                temp_str = "Disparos fallidos: "+str(self.info[plyr_inf][3])+"\n"
+                                          0, (255, 255, 255))
+            elif (i % 7 == 5):
+                temp_str = "Disparos fallidos: " + \
+                    str(self.resultados[plyr_inf][3])+"\n"
                 temporal = fuenteM.render(temp_str,
-                                    0, (255, 255, 255))
-            elif (i%7 == 6):
-                temp_str = "Efectividad : "+str(self.info[plyr_inf][4])+"%\n\n"
+                                          0, (255, 255, 255))
+            elif (i % 7 == 6):
+                temp_str = "Efectividad : " + \
+                    str(self.resultados[plyr_inf][4])+"%\n\n"
                 temporal = fuenteM.render(temp_str,
-                                    0, (255, 255, 255))            
+                                          0, (255, 255, 255))
             screen.blit(temporal, (90, lin))
-            lin +=20
+            lin += 20
 
 # Clases de sprites.
+
 
 class Jugador(pygame.sprite.Sprite):
 
@@ -426,7 +420,7 @@ class Jugador(pygame.sprite.Sprite):
                                        "Explotions",
                                        "Explosion2.png")
         # Sprites de una nave. [principal, explosion 1 , explosion 2]
-        self.images = list() 
+        self.images = list()
         self.images.append(cargar_sprite(spaceship_path))
         self.images.append(cargar_sprite(explotion1_path))
         self.images.append(cargar_sprite(explotion2_path))
@@ -520,6 +514,7 @@ class Jugador(pygame.sprite.Sprite):
         # TODO
 
         pass
+
     def ganar_vida(self):
         """ Le suma una vida al jugador."""
         self.vida += 1
@@ -694,7 +689,7 @@ def discriminar_accion(scene, accion, argumentos):
             jugador_origen.ganar_vida()
             scene.acciones[0] = "Disaparo acertado: {0} a {1}".format(
                 origen, objetivo)
-            
+
         pass
 
     elif accion == "muerte":
@@ -733,6 +728,12 @@ def discriminar_accion(scene, accion, argumentos):
         print accion, argumentos
         pass
 
+
+def calcular_porcentaje(total, porcion):
+    try:
+        return (porcion/float(total))*100
+    except ZeroDivisionError:
+        return 0.0
 # -----
 # MAIN
 # -----
@@ -740,6 +741,6 @@ def discriminar_accion(scene, accion, argumentos):
 if __name__ == "__main__":
     # path = raw_input("Ingrese log: ")
     path = "test.log"
-    Main = MainFrame(TITULO)
+    Main = MainFrame(TITULO, path)
     Main.change_scene(Inicio(Main, path))
     Main.loop()
