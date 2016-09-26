@@ -275,21 +275,6 @@ class Estadisticas(Scene):
         pygame.mixer.music.set_volume(0.8)
         pygame.mixer.music.play(0, 0.0)
 
-    def on_update(self):
-        """ Actualizar datos, cambia de escena si es necesario. """
-        # TODO
-        pass
-
-    def on_event(self, event):
-        """ Revisa si ocurrio un evento en el bucle principal. """
-        # TODO
-        if event:
-            self.start_replay = True
-
-    def on_draw(self, screen):
-        """ Refrescar datos en la pantalla."""
-
-        # TODO
         self.info = dict()
         with open(path_log) as log:
             self.replay = log.readlines()
@@ -339,6 +324,22 @@ class Estadisticas(Scene):
             efectividad_disparos = round(efectividad_disparos,1)
             self.info[p_inf].append(efectividad_disparos)
 
+    def on_update(self):
+        """ Actualizar datos, cambia de escena si es necesario. """
+        # TODO
+        pass
+
+    def on_event(self, event):
+        """ Revisa si ocurrio un evento en el bucle principal. """
+        # TODO
+        if event:
+            self.start_replay = True
+
+    def on_draw(self, screen):
+        """ Refrescar datos en la pantalla."""
+
+        # TODO
+        
         ## Mostramos las estadisticas en la escena estadisticas
         
         screen.blit(self.background, (0, 0))
@@ -355,23 +356,23 @@ class Estadisticas(Scene):
                 temporal = fuenteM.render(temp_str,
                                     0, (255, 255, 255))
             elif (i%7 == 2):
-                temp_str = "Muertes: "+str([self.info[plyr_inf][0])+"\n"
+                temp_str = "Muertes: "+str(self.info[plyr_inf][0])+"\n"
                 temporal = fuenteM.render(temp_str,
                                     0, (255, 255, 255))
             elif (i%7 == 3):
-                temp_str = "Colisiones: "+str([self.info[plyr_inf][1])+"\n"
+                temp_str = "Colisiones: "+str(self.info[plyr_inf][1])+"\n"
                 temporal = fuenteM.render(temp_str,
                                     0, (255, 255, 255))
             elif (i%7 == 4):
-                temp_str = "Disparos acertados: "+str([self.info[plyr_inf][2])+"\n"
+                temp_str = "Disparos acertados: "+str(self.info[plyr_inf][2])+"\n"
                 temporal = fuenteM.render(temp_str,
                                     0, (255, 255, 255))
             elif (i%7 == 5):
-                temp_str = "Disparos fallidos: "+str([self.info[plyr_inf][3])+"\n"
+                temp_str = "Disparos fallidos: "+str(self.info[plyr_inf][3])+"\n"
                 temporal = fuenteM.render(temp_str,
                                     0, (255, 255, 255))
             elif (i%7 == 6):
-                temp_str = "Efectividad : "+str([self.info[plyr_inf][4])+"%\n\n"
+                temp_str = "Efectividad : "+str(self.info[plyr_inf][4])+"%\n\n"
                 temporal = fuenteM.render(temp_str,
                                     0, (255, 255, 255))            
             screen.blit(temporal, (90, lin))
