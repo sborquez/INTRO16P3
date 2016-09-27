@@ -96,6 +96,8 @@ print stats, "\n-------\n", conexiones_entrantes,"\n--------\n",battlefield
 juego = 1
 log.append("juego:comenzar")
 while ( juego ):
+    if ( len(conexiones_entrantes = 1):
+        break 
     for id in conexiones_entrantes:
         jugador = conexiones_entrantes[id][2]
         socket_o = conexiones_entrantes[id][0]
