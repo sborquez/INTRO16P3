@@ -96,7 +96,7 @@ print stats, "\n-------\n", conexiones_entrantes,"\n--------\n",battlefield
 juego = 1
 log.append("juego:comenzar")
 while ( juego ):
-    if ( len(conexiones_entrantes = 1):
+    if ( len(conexiones_entrantes) == 1):
         break 
     for id in conexiones_entrantes:
         jugador = conexiones_entrantes[id][2]
@@ -118,7 +118,7 @@ while ( juego ):
         log.append("") #disparo
 
         estado = evaluar_movimiento(battlefield, posicion)
-        if ( estado = "D"):
+        if ( estado == "D"):
             stats[battlefield[disparo[x]][disparo[y]]][1]-=1
             stats[id][2]+=1
         estado = evaluar_movimiento(battlefield, posicion)
@@ -126,7 +126,7 @@ while ( juego ):
             battlefield[stats[id][3][0]][stats[id][3][1]] = 0
             battlefield[posicion[x]][posicion[y]] = id
             log.append("") #se movio
-        elif ( estado = "C"):
+        elif ( estado == "C"):
             log.append("") #se murio1
             log.append("") #se murio2
             del conexiones_entrantes[id]
@@ -135,7 +135,7 @@ while ( juego ):
             battlefield[posicion[x]][posicion[y]] = 0
             stats[battlefield[disparo[x]][disparo[y]]][2]-=1
         
-       stats, conexiones_entrantes, log =  fin_turno(stats, conexiones, log)
+        stats, conexiones_entrantes, log =  fin_turno(stats, conexiones, log)
 
 servidor.close()
 log.append("juego:terminar")
