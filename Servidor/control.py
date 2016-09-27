@@ -1,18 +1,22 @@
 def validar_coordenada( battlefield, coordenada ):
-    x,y = int( coordenada[0] ) , int( coordenada[1] )
+    print "coordenaddaa:", coordenada
+    x,y = coordenada[0] , coordenada[1] 
     max = len(battlefield)
     min = -1
     if ( x > min and x < max and y > min and y < 1): 
-        return true
+        return True
     else: 
-        return false
+        return False
 
 
 
 def evaluar_disparo(  battlefield, coordenada ):
-    if not validar_coordenada( batttlefield, coordenada): return "Coordenadas fuera de rango"
-    elif ( battlefield[x][y] != 0 ): return "D"
-    else: return "W"
+    if not validar_coordenada( battlefield, coordenada): 
+        return "Coordenadas fuera de rango"
+    elif ( battlefield[x][y] != 0 ): 
+        return "D"
+    else: 
+        return "W"
 
 def evaluar_movimiento( battlefield, coordenada ):
     if not validar_coordenada( battlefield, coordenada): 
