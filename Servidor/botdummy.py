@@ -1,6 +1,8 @@
 import numpy
 import random
 
+
+
 def escoger ( accion ):
     if ( accion == 3 ):
         l = [-1,1]
@@ -12,8 +14,8 @@ def escoger ( accion ):
         l = [-3,-2,2,3]
         return random.choice(list(l))
 
-def periodico ( r ):
-    if ( r >= 20 ): return (20-r)
+def periodico ( r ,SIZE):
+    if ( r >= SIZE ): return (SIZE-r)
     return r
 
 def amenaza ( valor ):
@@ -52,9 +54,9 @@ def estimar_amenaza ( posicion,battlefield ):
                     amenazas+="-"+str( amenaza (j) )
         return amenazas
 
-def spawn( battlefield ):
+def spawn( battlefield , SIZE):
     while (1):
-        x , y = random.randint(0,19), random.randint(0,19)
+        x , y = random.randint(0,SIZE-1), random.randint(0,SIZE-1)
         if ( battlefield[x][y] == 0 ):
             return x,y
 

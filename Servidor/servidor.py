@@ -8,6 +8,12 @@ IP = "localhost"
 PORT = 0000
 NJ = 2   #Numero de jugadores
 
+if (NJ < 5):
+    SIZE = 10
+elif (NJ < 10):
+    SIZE = 15
+else:
+    SIZE = 20
 
 """
     Funciones utilizadas:
@@ -46,7 +52,7 @@ def spawn_all( battlefield , conexiones_entrantes ):
     for id in conexiones_entrantes:
         socket_o = conexiones_entrantes[id][0]
         jugador = conexiones_entrantes[id][2]
-        x, y = spawn( battlefield )
+        x, y = spawn( battlefield, SIZE)
         stats[ id ] =(jugador,3,3,(x,y)) #nombre,vidas, y turnos restantes
         battlefield[x][y] = id
         log.append("aparecer:"+str(id)+","+str(x)+","+str(y))
