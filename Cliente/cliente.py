@@ -34,7 +34,7 @@ while (juego):
     disparo_x, disparo_y = disparar( random.randint(1,len( amenazas.split("-") ) ) )
     #ESCOGER UN MOVIMIENTO
     posicion_x, posicion_y = mover( (posicion[0],posicion[1]) )
-    #ENVIAR MOVIMIENTO
+    #ENVIAR DISPARO, MOVIMIENTO
     cliente.send(str(disparo_x)+","+str(disparo_y)+"-"+str(posicion_x)+","+str(posicion_y) )
     #IF MUERTO --> RE-SPAWN
     #IF GAME OVER --> BREAK    

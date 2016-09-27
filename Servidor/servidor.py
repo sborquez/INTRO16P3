@@ -1,6 +1,7 @@
 import socket
 from botdummy import *
 import numpy
+from control import *
 import random
 
 IP = "localhost"
@@ -98,8 +99,35 @@ while ( juego ):
         socket_o.send( estimar_amenaza(posicion, battlefield) )
         print "Esperando accion de ", jugador
         mensaje_recibido = socket_o.recv(1024)
+        
         disparo = (mensaje_recibido.split("-")[0]).split(",")
+        evaluar_disparo( battlefield, disparo)
         posicion = (mensaje_recibido.split("-")[1]).split(",")
-        battlefield[int(posicion[0]) ][int(posicion[1]) ] = id
+        posicion[0] = int(posicion[0])
+        posicion[1] = int(posicion[1])
+        disparo[0] = int(disparo[0])
+        disparo[1] = int(disparo[1])
+        log.append("") #disparo
+
+        estado = evaluar_movimiento(battlefield, posicion)
+        if ( estado = "D"):
+            stats[battlefield[disparo[x]][disparo[y]]][1]-=1
+
+        estado = evaluar_movimiento(battlefield, posicion)
+        if ( estado == "M"):
+            battlefield[stats[id][3][0]][stats[id][3][1]] = 0
+            battlefield[posicion[x]][posicion[y]] = id
+            log.append("") #se movio
+        elif ( estado = "C"):
+            log.append("") #se murio1
+            log.append("") #se murio2
+            del conexiones_entrantes[id]
+            del conexiones_entrantes[battlefield[posicion[x]][posicion[y]]]
+            battlefield[stats[id][3][0]][stats[id][3][1]] = 0
+            battlefield[posicion[x]][posicion[y]] = 0
+            stats[battlefield[disparo[x]][disparo[y]]][2]-=1
+        
+       stats, conexiones_entrantes, log =  fin_turno(stats, conexiones, log)
+
 servidor.close()
 log.append("juego:terminar")

@@ -8,16 +8,15 @@ def validar_coordenada( battlefield, coordenada ):
 
 
 def evaluar_disparo(  battlefield, coordenada ):
-    x,y = int( coordenada[0] ) , int( coordenada[1] )
     if !validar_coordenada( batttlefield, coordenada): return "Coordenadas fuera de rango"
-    elif ( battlefield[x][y] != 0 ): return "Disparo efectivo a "+battlefield[x][y]
-    else: return "Disparo Fallido"
+    elif ( battlefield[x][y] != 0 ): return "D"
+    else: return "W"
 
 def evaluar_movimiento( battlefield, coordenada ):
-    x,y = int( coordenada[0] ) , int( coordenada[1] )
     if !validar_coordenada( battlefield, coordenada): return "Cordenadas fuera de rango"
-    elif ( battlefield[x][y] == 0 ): return "Movimiento efectivo en  "+battlefield[x][y]
-    else: elif ( battlefield[x][y] != 0 ): return "Choque"
+    elif ( battlefield[x][y] == 0 ):
+        return "M"
+    else: elif ( battlefield[x][y] != 0 ): return "C"
 
 def actualizar_matriz(battlefield, coordenada, user):
     x,y = int(coordenada[0]), int(coordenada[1])
@@ -25,3 +24,11 @@ def actualizar_matriz(battlefield, coordenada, user):
         battlefield[x][y]=user
     else:
         return "Error de actualizacion"
+def fin_turno( stats, conexiones, log ):
+    for id in stats:
+        if (stats[id][1] == 0):
+            del conexiones[id]
+            log.append("")
+        else (stats[id][2] == 0):
+            stats[id][1]-=1
+    return stats, conexiones, log
