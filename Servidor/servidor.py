@@ -7,7 +7,7 @@ import time
 
 IP = "localhost"
 PORT = 0000
-NJ = 2   #Numero de jugadores
+NJ = 1   #Numero de jugadores
 
 if (NJ < 5):
     SIZE = 10
@@ -85,7 +85,7 @@ def spawn_all( battlefield , conexiones_entrantes, log):
 """
 
 log = list()
-log.append("#TITLE;"+time.strftime("%c")+";"+str(SIZE))
+log.append("#TITLE;"+time.strftime("%c")+"/"+str(SIZE))
 battlefield = numpy.tile(0,(20,20))
 servidor = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
 servidor.bind( (IP,PORT ) )
@@ -98,28 +98,29 @@ print stats, "\n-------\n", conexiones_entrantes,"\n--------\n",battlefield
 juego = 1
 log.append("juego:comenzar")
 while ( juego ):
-    if (len(conexiones_entrantes) == 1):
+    if ( len(conexiones_entrantes) == 0):
         break 
     for id in conexiones_entrantes:
         jugador = conexiones_entrantes[id][2]
         socket_o = conexiones_entrantes[id][0]
-        log.append(("alertar:",str(id)))
+        log.append("alertar:"+str(id))
         print "Alertando a ", jugador
         posicion = stats[id][3]
-        socket_o.send( estimar_amenaza(posicion, battlefield) )
+        socket_o.send( estimar_amenaza(posicion, battlefield, SIZE) )
         print "Esperando accion de ", jugador
         mensaje_recibido = socket_o.recv(1024)
 
         disparo = (mensaje_recibido.split("-")[0]).split(",")
         evaluar_disparo( battlefield, disparo)
         posicion = (mensaje_recibido.split("-")[1]).split(",")
+        print disparo, posicion
         posicion[0] = int(posicion[0])
         posicion[1] = int(posicion[1])
         disparo[0] = int(disparo[0])
         disparo[1] = int(disparo[1])
         log.append("") #disparo
 
-        estado = evaluar_movimiento(battlefield, posicion)
+        estado = evaluar_disparo(battlefield, posicion)
         if ( estado == "D"):
             stats[battlefield[disparo[x]][disparo[y]]][1]-=1
             stats[id][2]+=1
@@ -128,6 +129,7 @@ while ( juego ):
         estado = evaluar_movimiento(battlefield, posicion)
         if ( estado == "M"):
             battlefield[stats[id][3][0]][stats[id][3][1]] = 0
+            stats[id][3] = posicion
             battlefield[posicion[x]][posicion[y]] = id
             #TODO
             log.append("moverse:{ID},{X},{Y}".format(ID=id, X=0,Y=0)) #se movio
@@ -140,6 +142,7 @@ while ( juego ):
             battlefield[stats[id][3][0]][stats[id][3][1]] = 0
             battlefield[posicion[x]][posicion[y]] = 0
             stats[battlefield[disparo[x]][disparo[y]]][2]-=1
+
 	stats, conexiones_entrantes, log =  fin_turno(stats, conexiones, log)
 
 servidor.close()

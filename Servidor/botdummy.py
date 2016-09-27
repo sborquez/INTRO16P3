@@ -22,17 +22,17 @@ def amenaza ( valor ):
     l = [3,3,2,2,1]
     return l [ abs ( valor ) -1 ]
 
-def mover ( posicion, battlefield ):
+def mover ( posicion, battlefield ,SIZE):
     
     delta = escoger(3)
     battlefield[ posicion[0], posicion[1] ] = 0
     
     if ( random.randint(0,1) ):
-        posicion = posicion[0],periodico(posicion[1]+delta)
+        posicion = posicion[0],periodico(posicion[1]+delta,SIZE)
         battlefield[ posicion[0], posicion[1] ] = 1
         return posicion,battlefield
         
-    posicion = periodico( posicion[0]+1 ), posicion[1]
+    posicion = periodico( posicion[0]+1 ,SIZE), posicion[1]
     battlefield[ posicion[0], posicion[1] ] = 1
     return posicion,battlefield
 
@@ -42,15 +42,15 @@ def disparar ( amenaza, posicion ):
         return posicion[0]+delta
     return posicion[1]+delta
 
-def estimar_amenaza ( posicion,battlefield ):
+def estimar_amenaza ( posicion,battlefield ,SIZE):
     amenazas = "a"
     for i in xrange(2):
         for j in [-5,-4,-3,-2,-1,1,2,3,4,5]:
             if (i == 0):
-                if ( battlefield [ periodico ( posicion[i]+j)][1] == 1 ):
+                if ( battlefield [ periodico ( posicion[i]+j,SIZE)][1] == 1 ):
                     amenazas+="-"+str(amenaza (j)) 
             else:
-                if ( battlefield [0][ periodico ( posicion[i]+j ) ] == 1 ):
+                if ( battlefield [0][ periodico ( posicion[i]+j, SIZE ) ] == 1 ):
                     amenazas+="-"+str( amenaza (j) )
         return amenazas
 

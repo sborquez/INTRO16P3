@@ -27,7 +27,7 @@ while (juego):
     mensaje = cliente.recv(1024)
 
     #SI RECIBE UNA AMENAZA ESTAMOS OK, SE PROSIGUE CON ATACAR Y LUEGO MOVERSE
-
+    print mensaje
     if ( mensaje[0] == "a"):
         amenazas = mensaje
     #EN BASE A LA LISTA AMENAZAS, TOMAR UNA DECISION
