@@ -118,7 +118,7 @@ while ( juego ):
         estado = evaluar_movimiento(battlefield, posicion)
         if ( estado = "D"):
             stats[battlefield[disparo[x]][disparo[y]]][1]-=1
-
+            stats[id][2]+=1
         estado = evaluar_movimiento(battlefield, posicion)
         if ( estado == "M"):
             battlefield[stats[id][3][0]][stats[id][3][1]] = 0
