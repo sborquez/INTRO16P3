@@ -1,5 +1,4 @@
 import socket
-from botdummy import *
 import numpy
 from control import *
 import random
@@ -116,14 +115,14 @@ while ( juego ):
         print "Esperando accion de ", jugador
         mensaje_recibido = socket_o.recv(1024)
         
-        disparo = map(int,mensaje_recibido.split("-")[0]).split(","))
+        disparo = map(int,mensaje_recibido.split("-")[0].split(","))
         if not validar_disparo( disparo ):
             battefield[x0][y0] = 0
             matar(conexiones_entrantes,stats, id, jugador)
             print jugador," ha cometido disparo fuera de rango"
 
         #evaluar_disparo( battlefield, disparo)
-        movimiento = map(int,mensaje_recibido.split("-")[1]).split(","))
+        movimiento = map(int,mensaje_recibido.split("-")[1].split(","))
         if not validar_movimiento( movimiento ):
             matar(conexiones_entrante, stats, id , jugador)
             battefield[x0][y0] = 0
