@@ -18,21 +18,24 @@ cliente.send( usuario )
 posicion = spawn(cliente) 
 
 juego = 1
-while (juego):
+try:
+    while (juego):
 
-    #Recibir mensaje del servidor
-    mensaje = cliente.recv(1024)
+        #Recibir mensaje del servidor
+        mensaje = cliente.recv(1024)
 
-    # mensaje, es el string de amenazas, en base a aquel mensaje, tomar una decision
-    
-    """
-    escoger_disparo( mensaje ) se encuentra en botdummy, es tarea de ustedes completar esta función.
+        # mensaje, es el string de amenazas, en base a aquel mensaje, tomar una decision
+        
+        """
+        escoger_disparo( mensaje ) se encuentra en botdummy, es tarea de ustedes completar esta función.
 
-    escoger_movimieto( mensaje ) se encuentra en botdummy, es tarea de ustedes completar esta función.
+        escoger_movimieto( mensaje ) se encuentra en botdummy, es tarea de ustedes completar esta función.
 
-    """
-    disparo = escoger_disparo( mensaje )        
-    movimiento = escoger_movimiento( mensaje )
-    mensaje =  disparo+"/"+movimiento
-    cliente.send(mensaje )
-cliente.close()
+        """
+        disparo = escoger_disparo( mensaje )        
+        movimiento = escoger_movimiento( mensaje )
+        mensaje =  disparo+"/"+movimiento
+        cliente.send(mensaje )
+except socket.error:
+    cliente.close()
+    print "GAME OVER"

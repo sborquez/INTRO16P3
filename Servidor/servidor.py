@@ -5,8 +5,8 @@ import random
 import time
 
 IP = "localhost"
-PORT = 11111
-NJ = 1   #Numero de jugadores
+PORT = 8888
+NJ = 3   #Numero de jugadores
 
 if (NJ < 5):
     SIZE = 10
@@ -91,7 +91,7 @@ def spawn_all( battlefield , conexiones_entrantes, log):
 """
 
 log = list()
-title = time.strftime("%c").remplace(" ","_")
+title = time.strftime("%c").replace(" ","_")
 log.append("#TITLE;"+title+"/"+str(SIZE))
 battlefield = numpy.tile(0,(SIZE,SIZE))
 servidor = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
@@ -112,7 +112,7 @@ try:
         for id in conexiones_entrantes.keys():
             jugador = conexiones_entrantes[id][2]
             socket_o = conexiones_entrantes[id][0]
-            log.append("alertar:"+str(id))
+            #log.append("alertar:"+str(id))
             posicion = stats[id][3]
             x0, y0 = posicion[0], posicion[1]
             print "Alertando a ", jugador
@@ -124,14 +124,14 @@ try:
             disparo = map(int,(mensaje_recibido.split("/")[0]).split(","))
             if not validar_disparo( disparo ):
                 battefield[x0][y0] = 0
-                log.append("muere:{ID}".format(ID=jugador))
+                log.append("muerte:{ID}".format(ID=jugador))
                 matar(conexiones_entrantes,stats, id, jugador)
                 print jugador," ha cometido disparo fuera de rango"
 
             movimiento = map(int,(mensaje_recibido.split("/")[1]).split(","))
             if not validar_movimiento( movimiento ):
                 matar(conexiones_entrante, stats, id , jugador)
-                log.append("muere:{ID}".format(ID=jugador))
+                log.append("muerte:{ID}".format(ID=jugador))
                 battefield[x0][y0] = 0
                 print jugador," ha cometido un movimiento fuera de rango"
 
@@ -142,16 +142,20 @@ try:
             posicion = limites( posicion, SIZE)
             
             estado = evaluar_disparo(battlefield, posicion)
+            x, y = disparo[0], disparo[1]
+            y = y if y >= 0 else SIZE + y
+            x = x if x >= 0 else SIZE + x
             if ( estado ):
-                x, y = disparo[0], disparo[1]
                 id_golpeado = battlefield[x][y]
                 stats[id_golpeado][1] = stats[id_golpeado][1] -1
                 stats[id][2] = stats[id][2] +1
                 jugador2 = stats[id_golpeado][0]
-                log.append("disparar:{ID},{X},{Y},{ID2}".format(ID=jugador, X=disparo[0],Y=disparo[1],ID2=jugador2))
+                log.append("disparar:{ID},{X},{Y},{ID2}".format(ID=jugador, X=x,Y=y,ID2=jugador2))
+                log.append("muerte:{ID}".format(ID=jugador2))
+                log.append("aparecer:"+jugador2+","+str(x)+","+str(y))
             else:
                 stats[id][2] = stats[id][2] -1
-                log.append("disparar:{ID},{X},{Y},{OBJ}".format(ID=jugador, X=disparo[0],Y=disparo[1],OBJ="None"))            
+                log.append("disparar:{ID},{X},{Y},{OBJ}".format(ID=jugador, X=x,Y=y,OBJ="None"))            
 
             estado = evaluar_movimiento(battlefield, posicion)
             if ( estado ):
@@ -159,13 +163,15 @@ try:
                 battlefield[x0][y0] = 0
                 stats[id][3] = x1, y1
                 battlefield[x1][y1] = id
-                log.append("moverse:{ID},{X},{Y}".format(ID=jugador, X=posicion[0],Y=posicion[1]))
+                x1 = x1 if x1 >= 0 else SIZE + x1
+                y1 = y1 if y1 >= 0 else SIZE + y1
+                log.append("moverse:{ID},{X},{Y}".format(ID=jugador, X=x1,Y=y1))
             else:
                 x1, y1  = posicion[0], posicion[1]
                 id_golpeado = battlefield[x1][y1]
                 print jugador, " ha chocado a ", stats[id_golpeado][0]," ", jugador," sera destruido"
                 matar( conexiones_entrantes, stats, id,jugador)
-                log.append("muere:{ID}".format(ID=jugador))
+                log.append("desconectar:{ID}".format(ID=jugador))
                 battlefield[x0][y0] = 0
                 stats[id_golpeado][1]-=1
                 jugador2 = stats[id_golpeado][0]
@@ -177,7 +183,7 @@ try:
                     stats[ids][2] = 3;
                 if ( stats[ids][1] == 0 ):
                     jugador_in_for = stats[ids][0]
-                    log.append("muere:{ID}".format(ID=jugador_in_for))
+                    log.append("desconectar:{ID}".format(ID=jugador_in_for))
                     matar( conexiones_entrantes, stats, ids ,jugador_in_for)        
 
 except KeyboardInterrupt:
@@ -185,7 +191,7 @@ except KeyboardInterrupt:
 
 servidor.close()
 log.append("juego:terminar")
-with open(title+".log","w") as log_file:
+with open("../Visualizacion/logs/"+title+".log","w") as log_file:
     for linea in log:
         log_file.write(linea+"\n")
 
