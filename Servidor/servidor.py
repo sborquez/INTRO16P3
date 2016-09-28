@@ -56,7 +56,7 @@ def spawn_all( battlefield , conexiones_entrantes, log):
         x, y = spawn( battlefield, SIZE)
         stats[ id ] = list((jugador,3,3,[x,y])) #nombre,vidas, y turnos restantes
         battlefield[x][y] = id
-        log.append("aparecer:"+str(id)+","+str(x)+","+str(y))
+        log.append("aparecer:"+jugador+","+str(x)+","+str(y))
         print jugador," ha sido situado en "+str(x)+","+str(y)
         socket_o.send(str(x)+","+str(y))
     return stats
@@ -119,35 +119,36 @@ while ( juego ):
         posicion[1] = int(posicion[1])
         disparo[0] = int(disparo[0])
         disparo[1] = int(disparo[1])
-        estado = evaluar_disparo(battlefield, posicion)
+        estado = evaluar_disparo(battlefield, disparo)
         if ( estado == "D"):
-            stats[battlefield[disparo[x]][disparo[y]]][1]-=1
-            id2 = stats[battlefield[disparo[x]][disparo[y]]][0]
+            stats[battlefield[disparo[0]][disparo[1]]][1]-=1
+            id2 = stats[battlefield[disparo[0]][disparo[1]]][0]
             stats[id][2]+=1
             #TODO
-            log.append("disparar:{ID},{X},{Y},{ID2}".format(ID=jugador, X=disparo[x],Y=disparo[y],ID2=id2))
+            log.append("disparar:{ID},{X},{Y},{ID2}".format(ID=jugador, X=disparo[0],Y=disparo[1],ID2=id2))
             log.append("muere:{id2}".format(ID2=id2))
         elif ( estado == "W"):
-            log.append("disparar:{ID},{X},{Y},{OBJ}".format(ID=jugador, X=disparo[x],Y=disparo[y],OBJ="None"))
+            log.append("disparar:{ID},{X},{Y},{OBJ}".format(ID=jugador, X=disparo[0],Y=disparo[1],OBJ="None"))
         estado = evaluar_movimiento(battlefield, posicion)
+        x,y = posicion
         if ( estado == "M"):
             battlefield[stats[id][3][0]][stats[id][3][1]] = 0
             stats[id][3] = posicion
-            battlefield[posicion[x]][posicion[y]] = id
+            battlefield[posicion[0]][posicion[1]] = id
             #TODO
-            log.append("moverse:{ID},{X},{Y}".format(ID=jugador, X=posicion[x],Y=posicion[y])) #se movio
+            log.append("moverse:{ID},{X},{Y}".format(ID=jugador, X=posicion[0],Y=posicion[1])) #se movio
         elif ( estado == "C"):
             #TODO
             log.append("colision:{ID}".format(ID = jugador)) #se murio1
-            id2 = stats[battlefield[posicion[x]][posicion[y]]][0]
+            id2 = stats[battlefield[posicion[0]][posicion[1]]][0]
             log.append("colision:{ID}".format(ID = id2)) #se murio2
             del conexiones_entrantes[id]
-            del conexiones_entrantes[battlefield[posicion[x]][posicion[y]]]
+            del conexiones_entrantes[battlefield[posicion[0]][posicion[1]]]
             battlefield[stats[id][3][0]][stats[id][3][1]] = 0
-            battlefield[posicion[x]][posicion[y]] = 0
-            stats[battlefield[disparo[x]][disparo[y]]][2]-=1
+            battlefield[posicion[0]][posicion[1]] = 0
+            stats[battlefield[disparo[0]][disparo[1]]][2]-=1
 
-    stats, conexiones_entrantes, log =  fin_turno(stats, conexiones, log)
+    stats, conexiones_entrantes, log =  fin_turno(stats, conexiones_entrantes, log)
 
 title.replace(" ","_")
 servidor.close()
