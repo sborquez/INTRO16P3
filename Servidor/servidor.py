@@ -1,5 +1,4 @@
 import socket
-from botdummy import *
 import numpy
 from control import *
 import random 
@@ -28,6 +27,12 @@ else:
     a cada jugador
 
 """
+
+def matar( conexiones_entrantes, stats, id,jugador):
+    del conexiones_entrantes[id]
+    del stats[id]
+    print "Se ha eliminado a ", jugador
+
 def generar_id(conexiones_entrantes):
     while (1):
         id = random.randint(0,100)
@@ -54,7 +59,8 @@ def spawn_all( battlefield , conexiones_entrantes, log):
         socket_o = conexiones_entrantes[id][0]
         jugador = conexiones_entrantes[id][2]
         x, y = spawn( battlefield, SIZE)
-        stats[ id ] = list((jugador,3,3,[x,y])) #nombre,vidas, y turnos restantes
+        posicion = [x, y]
+        stats[ id ] =[jugador,3,3,posicion]
         battlefield[x][y] = id
         log.append("aparecer:"+jugador+","+str(x)+","+str(y))
         print jugador," ha sido situado en "+str(x)+","+str(y)
@@ -87,7 +93,7 @@ def spawn_all( battlefield , conexiones_entrantes, log):
 log = list()
 title = time.strftime("%c").remplace(" ","_")
 log.append("#TITLE;"+title+"/"+str(SIZE))
-battlefield = numpy.tile(0,(20,20))
+battlefield = numpy.tile(0,(SIZE,SIZE))
 servidor = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
 servidor.bind( (IP,PORT ) )
 print servidor.getsockname()
@@ -98,58 +104,82 @@ log.append("juego:comenzar")
 stats = spawn_all( battlefield, conexiones_entrantes, log)
 print stats, "\n-------\n", conexiones_entrantes,"\n--------\n",battlefield
 juego = 1
+
 try:
     while ( juego ):
         if ( len(conexiones_entrantes) == 0):
             break 
-        for id in conexiones_entrantes:
+        for id in conexiones_entrantes.keys():
             jugador = conexiones_entrantes[id][2]
             socket_o = conexiones_entrantes[id][0]
-            #log.append("alertar:"+jugador)
-            print "Alertando a ", jugador
+            log.append("alertar:"+str(id))
             posicion = stats[id][3]
-            socket_o.send( estimar_amenaza(posicion, battlefield, SIZE) )
+            x0, y0 = posicion[0], posicion[1]
+            print "Alertando a ", jugador
+            amenaza = estimar_amenaza(posicion, battlefield, SIZE)
+            socket_o.send( amenaza )
             print "Esperando accion de ", jugador
             mensaje_recibido = socket_o.recv(1024)
-            print mensaje_recibido
-            disparo = (mensaje_recibido.split("-")[0]).split(",")
-            evaluar_disparo( battlefield, disparo)
-            posicion = (mensaje_recibido.split("-")[1]).split(",")
-            print disparo, posicion
-            posicion[0] = int(posicion[0])
-            posicion[1] = int(posicion[1])
-            disparo[0] = int(disparo[0])
-            disparo[1] = int(disparo[1])
-            estado = evaluar_disparo(battlefield, disparo)
-            if ( estado == "D"):
-                stats[battlefield[disparo[0]][disparo[1]]][1]-=1
-                id2 = stats[battlefield[disparo[0]][disparo[1]]][0]
-                stats[id][2]+=1
-                #TODO
-                log.append("disparar:{ID},{X},{Y},{ID2}".format(ID=jugador, X=disparo[0],Y=disparo[1],ID2=id2))
-                log.append("muere:{id2}".format(ID2=id2))
-            elif ( estado == "W"):
-                log.append("disparar:{ID},{X},{Y},{OBJ}".format(ID=jugador, X=disparo[0],Y=disparo[1],OBJ="None"))
-            estado = evaluar_movimiento(battlefield, posicion)
-            x,y = posicion
-            if ( estado == "M"):
-                battlefield[stats[id][3][0]][stats[id][3][1]] = 0
-                stats[id][3] = posicion
-                battlefield[posicion[0]][posicion[1]] = id
-                #TODO
-                log.append("moverse:{ID},{X},{Y}".format(ID=jugador, X=posicion[0],Y=posicion[1])) #se movio
-            elif ( estado == "C"):
-                #TODO
-                log.append("colision:{ID}".format(ID = jugador)) #se murio1
-                id2 = stats[battlefield[posicion[0]][posicion[1]]][0]
-                log.append("colision:{ID}".format(ID = id2)) #se murio2
-                del conexiones_entrantes[id]
-                del conexiones_entrantes[battlefield[posicion[0]][posicion[1]]]
-                battlefield[stats[id][3][0]][stats[id][3][1]] = 0
-                battlefield[posicion[0]][posicion[1]] = 0
-                stats[battlefield[disparo[0]][disparo[1]]][2]-=1
+            
+            disparo = map(int,(mensaje_recibido.split("/")[0]).split(","))
+            if not validar_disparo( disparo ):
+                battefield[x0][y0] = 0
+                log.append("muere:{ID}".format(ID=jugador))
+                matar(conexiones_entrantes,stats, id, jugador)
+                print jugador," ha cometido disparo fuera de rango"
 
-        stats, conexiones_entrantes, log =  fin_turno(stats, conexiones_entrantes, log)
+            movimiento = map(int,(mensaje_recibido.split("/")[1]).split(","))
+            if not validar_movimiento( movimiento ):
+                matar(conexiones_entrante, stats, id , jugador)
+                log.append("muere:{ID}".format(ID=jugador))
+                battefield[x0][y0] = 0
+                print jugador," ha cometido un movimiento fuera de rango"
+
+            disparo = posicion[0] + disparo[0], posicion[1] + disparo[1]
+            posicion = posicion[0] + movimiento[0], posicion[1] + movimiento[1]
+            print disparo, posicion
+            disparo = limites( disparo, SIZE)
+            posicion = limites( posicion, SIZE)
+            
+            estado = evaluar_disparo(battlefield, posicion)
+            if ( estado ):
+                x, y = disparo[0], disparo[1]
+                id_golpeado = battlefield[x][y]
+                stats[id_golpeado][1] = stats[id_golpeado][1] -1
+                stats[id][2] = stats[id][2] +1
+                jugador2 = stats[id_golpeado][0]
+                log.append("disparar:{ID},{X},{Y},{ID2}".format(ID=jugador, X=disparo[0],Y=disparo[1],ID2=jugador2))
+            else:
+                stats[id][2] = stats[id][2] -1
+                log.append("disparar:{ID},{X},{Y},{OBJ}".format(ID=jugador, X=disparo[0],Y=disparo[1],OBJ="None"))            
+
+            estado = evaluar_movimiento(battlefield, posicion)
+            if ( estado ):
+                x1, y1  = posicion[0], posicion[1]
+                battlefield[x0][y0] = 0
+                stats[id][3] = x1, y1
+                battlefield[x1][y1] = id
+                log.append("moverse:{ID},{X},{Y}".format(ID=jugador, X=posicion[0],Y=posicion[1]))
+            else:
+                x1, y1  = posicion[0], posicion[1]
+                id_golpeado = battlefield[x1][y1]
+                print jugador, " ha chocado a ", stats[id_golpeado][0]," ", jugador," sera destruido"
+                matar( conexiones_entrantes, stats, id,jugador)
+                log.append("muere:{ID}".format(ID=jugador))
+                battlefield[x0][y0] = 0
+                stats[id_golpeado][1]-=1
+                jugador2 = stats[id_golpeado][0]
+                log.append("colision:{ID}".format(ID = jugador))
+                log.append("colision:{ID}".format(ID = jugador2))
+            for ids in stats.keys():
+                if ( stats[ids][2] == 0 ):
+                    stats[ids][1] = stats[ids][1]-1;
+                    stats[ids][2] = 3;
+                if ( stats[ids][1] == 0 ):
+                    jugador_in_for = stats[ids][0]
+                    log.append("muere:{ID}".format(ID=jugador_in_for))
+                    matar( conexiones_entrantes, stats, ids ,jugador_in_for)        
+
 except KeyboardInterrupt:
     print "STOP IT!"
 
