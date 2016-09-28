@@ -17,7 +17,7 @@ def limites( coordenada , limite):
         if (coordenada[i] >= limite):
             coordenada[i] = coordenada[i] - limite
         if ( coordenada[i] < 0):
-            coordenada[i] = limite - coordenada[i]
+            coordenada[i] = limite + coordenada[i]
     return coordenada
 
 def evaluar_disparo(  battlefield, coordenada ):
