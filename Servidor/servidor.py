@@ -58,7 +58,8 @@ def spawn_all( battlefield , conexiones_entrantes ):
         socket_o = conexiones_entrantes[id][0]
         jugador = conexiones_entrantes[id][2]
         x, y = spawn( battlefield, SIZE)
-        stats[ id ] =(jugador,3,3,(x,y))
+        posicion = [x, y]
+        stats[ id ] =[jugador,3,3,posicion]
         battlefield[x][y] = id
         log.append("aparecer:"+str(id)+","+str(x)+","+str(y))
         print jugador," ha sido situado en "+str(x)+","+str(y)
@@ -103,7 +104,7 @@ log.append("juego:comenzar")
 while ( juego ):
     if ( len(conexiones_entrantes) == 0):
         break 
-    for id in conexiones_entrantes:
+    for id in conexiones_entrantes.keys():
         jugador = conexiones_entrantes[id][2]
         socket_o = conexiones_entrantes[id][0]
         log.append("alertar:"+str(id))
@@ -115,7 +116,7 @@ while ( juego ):
         print "Esperando accion de ", jugador
         mensaje_recibido = socket_o.recv(1024)
         
-        disparo = map(int,(mensaje_recibido.split("-")[0]).split(","))
+        disparo = map(int,(mensaje_recibido.split("/")[0]).split(","))
         if not validar_disparo( disparo ):
             battefield[x0][y0] = 0
             matar(conexiones_entrantes,stats, id, jugador)
@@ -130,6 +131,7 @@ while ( juego ):
 
         disparo = posicion[0] + disparo[0], posicion[1] + disparo[1]
         posicion = posicion[0] + movimiento[0], posicion[1] + movimiento[1]
+        print disparo, posicion
         disparo = limites( disparo, SIZE)
         posicion = limites( posicion, SIZE)
         log.append("") #disparo
@@ -155,17 +157,15 @@ while ( juego ):
             id_golpeado = battlefield[x1][y1]
             print jugador, " ha chocado a ", stats[id_golpeado][0]," ", jugador," sera destruido"
             log.append("") #se murio1
-            matar(jugador)
+            matar( conexiones_entrantes, stats, id,jugador)
             battlefield[x0][y0] = 0
             stats[id_golpeado][1]-=1
-        
-        for id in stats:
+        for id in stats.keys():
             if ( stats[id][2] == 0 ):
                 stats[id][1] = stats[id][1]-1;
                 stats[id][2] = 3;
             if ( stats[id][1] == 0 ):
-                print "Ha muerto ", stats[id][0]
-                matar(id)
+                matar( conexiones_entrantes, stats, id,jugador)
 
 servidor.close()
 log.append("juego:terminar")
