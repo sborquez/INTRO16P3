@@ -8,8 +8,6 @@ def validar_coordenada( battlefield, coordenada ):
     else: 
         return False
 
-
-
 def evaluar_disparo(  battlefield, coordenada ):
     if not validar_coordenada( battlefield, coordenada): 
         return "Coordenadas fuera de rango"
@@ -19,10 +17,12 @@ def evaluar_disparo(  battlefield, coordenada ):
         return "W"
 
 def evaluar_movimiento(battlefield, coordenada):
-    if (validar_coordenada(batttlefield, coordenada) == false): return "Coordenadas fuera de rango"
+    if ( not validar_coordenada(battlefield, coordenada)): 
+        return "Coordenadas fuera de rango"
     elif (battlefield[x][y] == 0):
         return "M"
-    elif (battlefield[x][y] != 0): return "C"
+    elif (battlefield[x][y] != 0):
+        return "C"
 
 def actualizar_matriz(battlefield, coordenada, user):
     x,y = int(coordenada[0]), int(coordenada[1])
