@@ -1,7 +1,8 @@
 import socket
 import numpy
 import random
-from botplayer import *
+from botdummy import *
+
 battlefield = numpy.tile(0,(20,20))
 
 def spawn(cliente):
@@ -14,8 +15,7 @@ cliente = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
 IP = raw_input("ingrese la ip ")
 PORT = input("ingrese el puerto ")
 cliente.connect( (IP ,PORT ) )
-usuario = raw_input( "Ingrese nombre de usuario:" )
-cliente.send( usuario )
+cliente.send( "dummy" )
 
 #SPAWN INICIAL
 posicion = spawn(cliente) 
