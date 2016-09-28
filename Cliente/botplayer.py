@@ -1,5 +1,4 @@
 import numpy
-import random
 
 
 def escoger_movimiento( amenazas ):
