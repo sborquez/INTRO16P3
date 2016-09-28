@@ -420,7 +420,7 @@ class Jugador(pygame.sprite.Sprite):
         # Datos jugador.
         self.ID = ID
         self.alerta = 0
-        self.vidas = 2
+        self.vidas = 3
         self.battlefieldpos_x = -1
         self.battlefieldpos_y = -1
         self.orientacion = 0

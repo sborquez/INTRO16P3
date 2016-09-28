@@ -6,7 +6,7 @@ import time
 
 IP = "localhost"
 PORT = 8888
-NJ = 3   #Numero de jugadores
+NJ = 4   #Numero de jugadores
 
 if (NJ < 5):
     SIZE = 10
@@ -141,7 +141,7 @@ try:
             disparo = limites( disparo, SIZE)
             posicion = limites( posicion, SIZE)
             
-            estado = evaluar_disparo(battlefield, posicion)
+            estado = evaluar_disparo(battlefield, disparo)
             x, y = disparo[0], disparo[1]
             y = y if y >= 0 else SIZE + y
             x = x if x >= 0 else SIZE + x
