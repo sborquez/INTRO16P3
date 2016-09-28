@@ -274,7 +274,7 @@ class Estadisticas(Scene):
 
         # Musica.
         musica_path = os.path.join(
-            "data", "music", "Victory and Respite(end).ogg")
+            "data", "music", "Victory and Respite(end).mp3")
         pygame.mixer.music.load(musica_path)
         pygame.mixer.music.set_volume(0.8)
         pygame.mixer.music.play(0, 0.0)
@@ -863,8 +863,6 @@ def discriminar_accion(scene, accion, argumentos):
         scene.next_turn = True
 
     elif accion == "alertar":
-        ID, nivel = argumentos.split(",")
-        scene.players[ID].alerta = int(nivel)
         scene.next_turn = True
 
     else:
@@ -882,10 +880,10 @@ def buscar_logs():
                 with open(os.path.join("logs", log), 'r') as replay:
                     line = replay.readline()
                     TITLE, DATA = line.strip().split(";")
-                    FECHA, HORA, TAMANHO = DATA.split("/")
+                    FECHA, TAMANHO = DATA.split("/")
                     TAMANHO = int(TAMANHO)
                     logs[name] = (
-                        os.path.join("logs", log), FECHA, HORA, TAMANHO)
+                        os.path.join("logs", log), FECHA, TAMANHO)
             except ValueError:
                 print "{0} NO tiene el formato correcto.".format(log)
     return logs
@@ -901,14 +899,14 @@ def elegir_partidas(logs):
                         hora:       (str)hora de la partida.
                         tamanho:    (int)tamanho del tablero."""
     print "Archivos encontrados:"
-    for log, (_, FECHA, HORA, TAMANHO) in logs.items():
+    for log, (_, FECHA, TAMANHO) in logs.items():
         print "\t> {0}:\t".format(log),
-        print "Fecha:{0}\tHora:{1}\tTamanho:{2}".format(FECHA, HORA, TAMANHO)
+        print "Fecha:{0}\tTamanho:{1}".format(FECHA, TAMANHO)
 
     while True:
         log = raw_input("Seleccione log: ")
         try:
-            path, _, _, tamanho = logs[log]
+            path, _, tamanho = logs[log]
             return path, tamanho
         except KeyError:
             print "El archivo no existe."
