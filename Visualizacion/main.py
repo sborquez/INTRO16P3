@@ -420,7 +420,7 @@ class Jugador(pygame.sprite.Sprite):
         # Datos jugador.
         self.ID = ID
         self.alerta = 0
-        self.vidas = 2
+        self.vidas = 3
         self.battlefieldpos_x = -1
         self.battlefieldpos_y = -1
         self.orientacion = 0
@@ -856,9 +856,9 @@ def discriminar_accion(scene, accion, argumentos):
             jugador.quitar_vida()
             scene.turnos_restantes = Q_turnos
 
-    elif accion == "desconectado":
+    elif accion == "desconectar":
         sleep(0.5)
-        scene.acciones[0] = "Se ha desconectado: {0}".format(argumentos)
+        scene.acciones[0] = "Se ha desconectar: {0}".format(argumentos)
         del scene.players[argumentos]
         scene.next_turn = True
 
