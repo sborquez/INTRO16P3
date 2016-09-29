@@ -91,7 +91,7 @@ def spawn_all( battlefield , conexiones_entrantes, log):
 """
 
 log = list()
-title = time.strftime("%c").remplace(" ","_")
+title = time.strftime("%c").replace(" ","_")
 log.append("#TITLE;"+title+"/"+str(SIZE))
 battlefield = numpy.tile(0,(SIZE,SIZE))
 servidor = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
