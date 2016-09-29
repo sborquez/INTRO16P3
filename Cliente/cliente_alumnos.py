@@ -27,9 +27,9 @@ try:
         # mensaje, es el string de amenazas, en base a aquel mensaje, tomar una decision
         
         """
-        escoger_disparo( mensaje ) se encuentra en botdummy, es tarea de ustedes completar esta función.
+        escoger_disparo( mensaje ) se encuentra en botdummy, es tarea de ustedes completar esta funcion.
 
-        escoger_movimieto( mensaje ) se encuentra en botdummy, es tarea de ustedes completar esta función.
+        escoger_movimieto( mensaje ) se encuentra en botdummy, es tarea de ustedes completar esta funcion.
 
         """
         disparo = escoger_disparo( mensaje )        
