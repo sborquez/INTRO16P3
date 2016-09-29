@@ -872,7 +872,7 @@ def discriminar_accion(scene, accion, argumentos):
 
 def buscar_logs():
     """ Busca en el directorio logs, guarda los archivos en un diccionario."""
-    logs = dict()
+    logs = list()
     for log in os.listdir("logs"):
         name, ext = os.path.splitext(log)
         if ext == ".log":
@@ -882,8 +882,8 @@ def buscar_logs():
                     TITLE, DATA = line.strip().split(";")
                     FECHA, TAMANHO = DATA.split("/")
                     TAMANHO = int(TAMANHO)
-                    logs[name] = (
-                        os.path.join("logs", log), FECHA, TAMANHO)
+                    logs.append((
+                        os.path.join("logs", log), FECHA, TAMANHO))
             except ValueError:
                 print "{0} NO tiene el formato correcto.".format(log)
     return logs
@@ -899,18 +899,19 @@ def elegir_partidas(logs):
                         hora:       (str)hora de la partida.
                         tamanho:    (int)tamanho del tablero."""
     print "Archivos encontrados:"
-    for log, (_, FECHA, TAMANHO) in logs.items():
+    for log, (path, FECHA, TAMANHO) in enumerate(logs):
         print "\t> {0}:\t".format(log),
-        print "Fecha:{0}\tTamanho:{1}".format(FECHA, TAMANHO)
+        print "Path:{0}\tFecha:{1}\tTamanho:{2}".format(path,FECHA, TAMANHO)
 
     while True:
-        log = raw_input("Seleccione log: ")
         try:
+            log = int(raw_input("Seleccione log: "))
             path, _, tamanho = logs[log]
             return path, tamanho
-        except KeyError:
-            print "El archivo no existe."
-
+        except IndexError:
+            print "Entrada incorrecta."
+        except  ValueError:
+            print "Ingrese un numero."
 
 def calcular_porcentaje(total, porcion):
     try:
