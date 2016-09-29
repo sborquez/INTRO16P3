@@ -21,7 +21,8 @@ try:
     while (juego):
 
         mensaje = cliente.recv(1024)
-        disparo = escoger_disparo( mensaje )
+        amenazas = mensaje.split(":")[0]
+        disparo = escoger_disparo( amenazas )
         movimiento = escoger_movimiento()
         mensaje = disparo + "/" + movimiento
         cliente.send( mensaje )
