@@ -6,7 +6,7 @@ import time
 
 IP = "localhost"
 PORT = 8888
-NJ = 4   #Numero de jugadores
+NJ = 1   #Numero de jugadores
 
 if (NJ < 5):
     SIZE = 10
@@ -95,7 +95,7 @@ title = time.strftime("%c").replace(" ","_")
 log.append("#TITLE;"+title+"/"+str(SIZE))
 battlefield = numpy.tile(0,(SIZE,SIZE))
 servidor = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
-servidor.bind( (IP,PORT ) )
+servidor.bind( (IP,0 ) )
 print servidor.getsockname()
 servidor.listen(NJ)
 print "Esperando Conexiones"

@@ -6,12 +6,11 @@ def spawn(cliente):
     mensaje = cliente.recv(1024)
     posicion = mensaje.split(",")
     return int(posicion[0]), int(posicion[1])
-print "Conectado"
 cliente = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
-#IP = raw_input("ingrese la ip ")
-#PORT = input("ingrese el puerto ")
-IP,PORT = "localhost",8888
+IP = raw_input("ingrese la ip ")
+PORT = input("ingrese el puerto ")
 cliente.connect( (IP ,PORT ) )
+print "Conectado"
 name  = randint(0,991)
 cliente.send( "dummy{0}".format(name) )
 posicion = spawn(cliente) 

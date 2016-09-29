@@ -1,7 +1,7 @@
 import random
 
 def validar_movimiento( movimiento ):
-    posibles_movimientos = {(1,0),(-1,0),(0,1),(0,-1)}
+    posibles_movimientos = {(1,0),(-1,0),(0,1),(0,-1),(2,0),(-2,0),(0,2),(0,-2),(3,0),(-3,0),(0,3),(0,-3)}
     movimiento = movimiento[0], movimiento[1]
     return movimiento in posibles_movimientos
 
@@ -52,10 +52,28 @@ def estimar_amenaza ( posicion,battlefield ,SIZE):
             else:
                 if ( battlefield [0][ periodico ( posicion[i]+j, SIZE ) ] == 1 ):
                     amenazas+="-"+str( amenaza (j) )
-        return amenazas
+        return amenazas+":"+calcular_cuadrantes( battlefield, posicion )
 
 def spawn( battlefield , SIZE):
     while (1):
         x , y = random.randint(0,SIZE-1), random.randint(0,SIZE-1)
         if ( battlefield[x][y] == 0 ):
             return x,y
+
+def calcular_cuadrantes( battlefield, posicion ):
+    l = [0,0,0,0]
+    x , y = posicion[0], posicion[1]
+    for i in xrange(10):
+        for j in xrange(10):
+            if battlefield[i][j] !=0:
+                if i < x and j < y:
+                    l[1] = l[1]+1
+                elif i > x and j < y:
+                    l[0] = l[0]+1
+                elif i < x and j > y:
+                    l[2] = l[2]+1
+                elif i > x and j > y:
+                    l[3] = l[3]+1
+                    
+    l = map(str, l)
+    return l[0]+"-"+l[1]+"-"+l[2]+"-"+l[3]
