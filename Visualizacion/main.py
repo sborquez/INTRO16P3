@@ -187,7 +187,7 @@ class Principal(Scene):
 
         # Si se termino de actualizar los datos de un turno, leer el siguiente.
         if self.next_turn:
-            sleep(0.5)
+            sleep(0.05)
             del self.acciones[-1]
             self.acciones.insert(0, "")
             self.next_turn = False
@@ -585,10 +585,10 @@ class Jugador(pygame.sprite.Sprite):
             self.laser.cambio_disparado()
             return True
 
-        elif round(self.__disparo, 3) > 0.50:
+        elif round(self.__disparo, 4) > 0.50:
             self.laser.rotate()
 
-        elif round(self.__disparo, 3) == 0.50:
+        elif round(self.__disparo, 4) == 0.50:
             # SFX
             self.visible = 0
             laser = "laser{0}.wav".format(choice("123"))
@@ -596,17 +596,18 @@ class Jugador(pygame.sprite.Sprite):
             self.laser.disparo_a(int(coor_x), int(coor_y))
             self.laser.cambio_disparado()
 
-        elif round(self.__disparo, 3) > 0.00:
+        elif round(self.__disparo, 4) > 0.00:
             if int(self.__disparo*50) % 2:
                 self.visible = 0
             else:
                 self.visible = 3
         else:
             # SFX
-            self.sound_fx(["data", "sfx", "charging.wav"], 0.2)
+            #self.sound_fx(["data", "sfx", "charging.wav"], 0.2)
+            pass
         self.image = pygame.transform.rotate(
             self.images[self.visible], self.orientacion)
-        self.__disparo = round(self.__disparo + 0.005, 3)
+        self.__disparo = round(self.__disparo + 0.025, 4)
         return False
 
     def ganar_vida(self):
@@ -792,7 +793,7 @@ def discriminar_accion(scene, accion, argumentos):
     """
 
     if accion == "aparecer":
-        sleep(0.05)
+        sleep(0.03)
         ID, x, y = argumentos.split(",")
         jugador = scene.players[ID]
         jugador.aparecer((int(x), int(y)))
@@ -839,7 +840,7 @@ def discriminar_accion(scene, accion, argumentos):
                 origen, objetivo)
 
     elif accion == "muerte":
-        sleep(0.7)
+        sleep(0.25)
         scene.acciones[0] = "Muere: {0}".format(argumentos)
         jugador = scene.players[argumentos]
         scene.next_turn = jugador.morir()
@@ -848,7 +849,7 @@ def discriminar_accion(scene, accion, argumentos):
             scene.turnos_restantes = Q_turnos
 
     elif accion == "colision":
-        sleep(0.7)
+        sleep(0.25)
         scene.acciones[0] = "Colisiona: {0}".format(argumentos)
         jugador = scene.players[argumentos]
         scene.next_turn = jugador.morir()
@@ -857,7 +858,7 @@ def discriminar_accion(scene, accion, argumentos):
             scene.turnos_restantes = Q_turnos
 
     elif accion == "desconectar":
-        sleep(0.5)
+        sleep(0.25)
         scene.acciones[0] = "Se ha desconectar: {0}".format(argumentos)
         del scene.players[argumentos]
         scene.next_turn = True
