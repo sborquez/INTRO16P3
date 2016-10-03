@@ -1,12 +1,28 @@
+"""
+* ----------------------------------------------------------------------------
+* "LA LICENCIA COMPLETO-WARE" (Versión 4.2):
+* GasparOctavio escribió este archivo. Siempre y cuando usted mantenga este aviso,
+* puede hacer lo que quiera con esta materia. Si nos encontramos algún día, y usted piensa
+* que esto vale la pena, me puede comprar un completo a cambio.
+* ----------------------------------------------------------------------------
+"""
+
 import socket
 import numpy
 from control import *
 import random 
 import time
 
-IP = "localhost"
-PORT = 8888
-NJ = 1   #Numero de jugadores
+
+"""
+    Aqui deben asignar valores para configurar la partida a su gusto
+    IP: Escoger una ip distinta a localhost si es que desean jugar con otro computador
+    PORT: No recomiendo cambiarlo, pero aun esta a su disposición cambiarlo
+    NJ: Cantidad de bots que participaran en la partida
+"""
+IP = "localhost" 
+PORT = 8888 
+NJ = 1
 
 if (NJ < 5):
     SIZE = 10
@@ -24,7 +40,13 @@ else:
 
     spawn_all
     Situa a todos los jugadores en la matriz battlefield, y envia respectivas posiciones
-    a cada jugador
+    a cada jugadori
+
+    matar
+    Elimina la conexion con un jugador de la partida
+
+    generar_id
+    Asigna a cada usuario un id numérico, se usa para identificar al jugador internamente
 
 """
 
@@ -89,13 +111,16 @@ def spawn_all( battlefield , conexiones_entrantes, log):
      [0,id_jugador_2,0]]
 
 """
-
+#Muy importante revisar el log una vez terminada la partida, el log entrega un resumen de lo que resulto la partida
 log = list()
 title = time.strftime("%c").replace(" ","_")
 log.append("#TITLE;"+title+"/"+str(SIZE))
 battlefield = numpy.tile(0,(SIZE,SIZE))
 servidor = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
-servidor.bind( (IP,0 ) )
+
+# Si desea escoger un puerto en especifico cambiar 0, por PORT, de lo contrario, buscara cualquier puerto disponible
+servidor.bind( (IP,0 ) ) 
+# Indica a que IP y PORT deben conectarse los clientes
 print servidor.getsockname()
 servidor.listen(NJ)
 print "Esperando Conexiones"

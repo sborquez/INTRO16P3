@@ -1,3 +1,12 @@
+"""
+* ----------------------------------------------------------------------------
+* "LA LICENCIA COMPLETO-WARE" (Versión 4.2):
+* GasparOctavio escribió este archivo. Siempre y cuando usted mantenga este aviso,
+* puede hacer lo que quiera con esta materia. Si nos encontramos algún día, y usted piensa
+* que esto vale la pena, me puede comprar un completo a cambio.
+* ----------------------------------------------------------------------------
+"""
+
 import socket
 from random import randint
 from botdummy import *

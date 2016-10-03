@@ -1,5 +1,30 @@
+"""
+* ----------------------------------------------------------------------------
+* "LA LICENCIA COMPLETO-WARE" (Versión 4.2):
+* GasparOctavio escribió este archivo. Siempre y cuando usted mantenga este aviso,
+* puede hacer lo que quiera con esta materia. Si nos encontramos algún día, y usted piensa
+* que esto vale la pena, me puede comprar un completo a cambio.
+* ----------------------------------------------------------------------------
+"""
+"""
+Funciones utilizadas
+
+    escoger
+        En base a una accion(disparo o movimiento), escoge un numero aleatorio.
+    
+    escoger_movimiento
+        Escoge movimiento aleatorio
+    
+    escoger_disparo
+        Escoge disparo aleatorio en base a la amenaza.
+
+"""
+
+
 import numpy
 import random
+
+
 
 def escoger ( accion ):
     if ( accion == 3 ):

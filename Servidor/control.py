@@ -1,3 +1,48 @@
+"""
+* ----------------------------------------------------------------------------
+* "LA LICENCIA COMPLETO-WARE" (Versión 4.2):
+* GasparOctavio escribió este archivo. Siempre y cuando usted mantenga este aviso,
+* puede hacer lo que quiera con esta materia. Si nos encontramos algún día, y usted piensa
+* que esto vale la pena, me puede comprar un completo a cambio.
+* ----------------------------------------------------------------------------
+"""
+
+"""
+    Funciones utilizadas    
+
+    validar_movimiento
+    Chequea que el movimiento realizado por el jugador esta dentro de los valores esperados
+
+    validar_disparo
+    Análogo a validar_movimiento
+
+    limites
+    Permite el movimiento entre los limites del mapa. (Ej: Salir por arriba y entrar por abajo)
+
+    evaluar_movimiento
+    Entrega el resultado del movimiento:
+        - True, en caso de que se realizo sin inconvenientes.
+        - False, en caso de que hubo choque.
+    
+    evaluar_disparo
+    Entrega el resultado del disparo:
+        - True, en caso de haber golpeado a alguien.
+        - Falso, disparo al agua.
+    
+    amenaza
+    En base a una distancia, entrega el grado de amenaza
+
+    estimar_amenazas
+    En base a una posicion, entrega todas las amenazas respecto a esa posicion
+    
+    calcular_cuadrantes
+    En base a una posicion, entrega la cantidad de enemigos en cada cuadrante relativo a la posicion
+
+    spawn
+    Asigna a un jugador una posicion inicial en el tablero
+
+
+"""
 import random
 
 def validar_movimiento( movimiento ):
