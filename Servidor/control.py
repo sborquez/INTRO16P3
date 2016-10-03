@@ -66,14 +66,14 @@ def calcular_cuadrantes( battlefield, posicion ):
     for i in xrange(10):
         for j in xrange(10):
             if battlefield[i][j] !=0:
-                if i < x and j < y:
+                if i <= x and j < y:
                     l[1] = l[1]+1
-                elif i > x and j < y:
+                elif i > x and j <= y:
                     l[0] = l[0]+1
-                elif i < x and j > y:
+                elif i < x and j >= y:
                     l[2] = l[2]+1
-                elif i > x and j > y:
+                elif i >= x and j > y:
                     l[3] = l[3]+1
                     
     l = map(str, l)
-    return l[0]+"-"+l[1]+"-"+l[2]+"-"+l[3]
+    return l[2]+"-"+l[1]+"-"+l[0]+"-"+l[3]
