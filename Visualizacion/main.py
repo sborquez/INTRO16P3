@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import os
 import pygame
 from random import randint, choice
@@ -7,7 +10,7 @@ from time import sleep
 
 TITULO = "Speis Guars"
 
-#  Constantes de tamanhos para dibujar.
+#  Constantes de tamaños para dibujar.
 SPACESHIPS = 45
 BATTLEFIELDSIZE = 460.0
 BATTLEFIELDDIVISIONS = 20
@@ -893,16 +896,17 @@ def buscar_logs():
 def elegir_partidas(logs):
     """ Muestra los archivos encontrados, pide elegir uno para reproducir.
         Parametros:
-            -logs:  (dict(name:(path,fecha,hora,tamanho)
+            -logs:  (dict(name:(path,fecha,hora,tamaño)
                         name:       (str)Nombre de la partida.
                         path:       (str)ruta de la partida.
                         fecha:      (str)fecha de la partida.
                         hora:       (str)hora de la partida.
-                        tamanho:    (int)tamanho del tablero."""
+                        tamanho:    (int)tamanho del tablero.
+    """
     print "Archivos encontrados:"
     for log, (path, FECHA, TAMANHO) in enumerate(logs):
         print "\t> {0}:\t".format(log),
-        print "Path:{0}\tFecha:{1}\tTamanho:{2}".format(path,FECHA, TAMANHO)
+        print "Path:{0}\tFecha:{1}\tTamaño:{2}".format(path,FECHA, TAMANHO)
 
     while True:
         try:

@@ -210,6 +210,9 @@ try:
 except KeyboardInterrupt:
     print "STOP IT!"
 
+except Exception as e:
+    print "Unexpected error:", type(e), "Argumentos",e.args
+
 servidor.close()
 log.append("juego:terminar")
 with open("../Visualizacion/logs/"+title+".log","w") as log_file:
