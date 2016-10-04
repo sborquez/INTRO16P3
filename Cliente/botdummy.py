@@ -1,5 +1,26 @@
+# Escrito por GasparCorrea
+# gasparcorreavergara@gmail.com
+
+
+"""
+Funciones utilizadas
+
+    escoger
+        En base a una accion(disparo o movimiento), escoge un numero aleatorio.
+    
+    escoger_movimiento
+        Escoge movimiento aleatorio
+    
+    escoger_disparo
+        Escoge disparo aleatorio en base a la amenaza.
+
+"""
+
+
 import numpy
 import random
+
+
 
 def escoger ( accion ):
     if ( accion == 3 ):

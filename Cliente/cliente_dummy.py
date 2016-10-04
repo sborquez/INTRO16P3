@@ -1,3 +1,6 @@
+# Escrito por GasparCorrea
+# gasparcorreavergara@gmail.com
+
 import socket
 from random import randint
 from botdummy import *

@@ -1,3 +1,42 @@
+# Escrito por GasparCorrea
+# gasparcorreavergara@gmail.com
+
+"""
+    Funciones utilizadas    
+
+    validar_movimiento
+    Chequea que el movimiento realizado por el jugador esta dentro de los valores esperados
+
+    validar_disparo
+    Análogo a validar_movimiento
+
+    limites
+    Permite el movimiento entre los limites del mapa. (Ej: Salir por arriba y entrar por abajo)
+
+    evaluar_movimiento
+    Entrega el resultado del movimiento:
+        - True, en caso de que se realizo sin inconvenientes.
+        - False, en caso de que hubo choque.
+    
+    evaluar_disparo
+    Entrega el resultado del disparo:
+        - True, en caso de haber golpeado a alguien.
+        - Falso, disparo al agua.
+    
+    amenaza
+    En base a una distancia, entrega el grado de amenaza
+
+    estimar_amenazas
+    En base a una posicion, entrega todas las amenazas respecto a esa posicion
+    
+    calcular_cuadrantes
+    En base a una posicion, entrega la cantidad de enemigos en cada cuadrante relativo a la posicion
+
+    spawn
+    Asigna a un jugador una posicion inicial en el tablero
+
+
+"""
 import random
 
 def validar_movimiento( movimiento ):
@@ -66,14 +105,14 @@ def calcular_cuadrantes( battlefield, posicion ):
     for i in xrange(10):
         for j in xrange(10):
             if battlefield[i][j] !=0:
-                if i < x and j < y:
+                if i <= x and j < y:
                     l[1] = l[1]+1
-                elif i > x and j < y:
+                elif i > x and j <= y:
                     l[0] = l[0]+1
-                elif i < x and j > y:
+                elif i < x and j >= y:
                     l[2] = l[2]+1
-                elif i > x and j > y:
+                elif i >= x and j > y:
                     l[3] = l[3]+1
                     
     l = map(str, l)
-    return l[0]+"-"+l[1]+"-"+l[2]+"-"+l[3]
+    return l[2]+"-"+l[1]+"-"+l[0]+"-"+l[3]
