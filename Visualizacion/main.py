@@ -10,6 +10,17 @@ from time import sleep
 
 TITULO = "Speis Guars"
 
+# Velocidad de reproduccion.
+# 0 muy lento
+# 1 lento
+# 2 normal
+# 3 rapido
+# 4 muy rapido
+V = 2
+
+# Valores para la velocidad de reproduccion.
+VELOCIDADES = [ 1.2, 0.5, 0.1,0.05 ,0.005]
+
 #  Constantes de tamaños para dibujar.
 SPACESHIPS = 45
 BATTLEFIELDSIZE = 460.0
@@ -46,7 +57,8 @@ class Inicio(Scene):
            start_replay:    (bool) Comenzar a reproducir el replay.
            replay:          (list(string)) Lineas del archivo log.
            players:         (dict((ID:Jugador)) Contiene objetos Jugadores.
-           colortxt:        (list(int,int, int))Color del texto en RGB."""
+           colortxt:        (list(int,int, int))Color del texto en RGB.
+    """
 
     def __init__(self, director, path_log):
         """Parametros.
@@ -81,6 +93,7 @@ class Inicio(Scene):
         # colortxt: Color del texto en RGB.
         self.colortxt = [0, 0, 0]
 
+
     def on_update(self):
         """ Actualizar datos, cambia de escena si es necesario. """
 
@@ -112,7 +125,8 @@ class Inicio(Scene):
     def on_draw(self, screen):
         """ Refrescar datos en la pantalla.
             Parametros:
-                - screen: Ventana donde se dibuja."""
+                - screen: Ventana donde se dibuja.
+        """
         screen.blit(self.background, (0, 0))
         screen.blit(self.textinscreen, (WIDTH/3, 5*HEIGHT/6))
 
@@ -140,6 +154,7 @@ class Principal(Scene):
             end_replay:      (bool) Indica si ha terminado el replay.
             acciones:        (list(str) Pila de informacion ya leida.
             turnos_restantes:(int)turnos restantes para que termine el juego.
+            vel              (int) indice de velocidad de reproduccion
     """
 
     def __init__(self, director, dict_players, replay):
@@ -181,6 +196,9 @@ class Principal(Scene):
         self.acciones = ["", "", "", "", "", "", "", "", ""]
         self.turnos_restantes = Q_turnos
 
+        #velocidad de reproduccion
+        self.vel = V
+
     def on_update(self):
         """ Actualizar datos, cambia de escena si es necesario. """
 
@@ -190,7 +208,10 @@ class Principal(Scene):
 
         # Si se termino de actualizar los datos de un turno, leer el siguiente.
         if self.next_turn:
-            sleep(0.05)
+
+            # Velocidad del juego
+            sleep(VELOCIDADES[self.vel]) 
+
             del self.acciones[-1]
             self.acciones.insert(0, "")
             self.next_turn = False
@@ -209,6 +230,11 @@ class Principal(Scene):
         if event == pygame.K_SPACE:
             pygame.mixer.music.stop()
             self.end_replay = True
+        if event == pygame.K_DOWN and self.vel != 0:
+            self.vel -= 1
+
+        elif event == pygame.K_UP and self.vel != 5:
+            self.vel += 1
 
     def on_draw(self, screen):
         """ Refrescar datos en la pantalla.
@@ -820,13 +846,13 @@ def discriminar_accion(scene, accion, argumentos):
         coor_y = jugador.battlefieldpos_y
         resultado = (round(new_x - coor_x, 2), round(new_y - coor_y, 2))
 
-        if 0.01 < resultado[0] <= 1 or resultado[0] < -1:
+        if 0.01 < resultado[0] <= 3 or resultado[0] < -3:
             jugador.mover("rigth")
-        elif -0.01 > resultado[0] >= -1 or resultado[0] > 1:
+        elif -0.01 > resultado[0] >= -3 or resultado[0] > 3:
             jugador.mover("left")
-        elif 0.01 < resultado[1] <= 1 or resultado[1] < -1:
+        elif 0.01 < resultado[1] <= 3 or resultado[1] < -3:
             jugador.mover("down")
-        elif -0.01 > resultado[1] >= -1 or resultado[1] > 1:
+        elif -0.01 > resultado[1] >= -3 or resultado[1] > 3:
             jugador.mover("up")
         else:
             scene.next_turn = True
@@ -927,7 +953,10 @@ def calcular_porcentaje(total, porcion):
 # MAIN
 # -----
 
+
+
 if __name__ == "__main__":
+
     logs = buscar_logs()
     path, BATTLEFIELDDIVISIONS = elegir_partidas(logs)
 
