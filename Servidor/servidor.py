@@ -1,7 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # Escrito por GasparCorrea
 # gasparcorreavergara@gmail.com
-
-"""
 
 import socket
 import numpy

@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # Escrito por GasparCorrea
 # gasparcorreavergara@gmail.com
 
