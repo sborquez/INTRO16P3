@@ -18,9 +18,9 @@ import time
 """
 IP = "localhost" 
 PORT = 8888 
-NJ = 2
+NJ = 1
 
-if (NJ <= 2)
+if (NJ <= 2):
     SIZE = 5
 elif (NJ < 5):
     SIZE = 10
@@ -171,7 +171,7 @@ try:
             if ( estado ):
                 id_golpeado = battlefield[x][y]
                 stats[id_golpeado][1] = stats[id_golpeado][1] -1
-                stats[id][2] = stats[id][2] +1
+                stats[id][2] = 3
                 jugador2 = stats[id_golpeado][0]
                 log.append("disparar:{ID},{X},{Y},{ID2}".format(ID=jugador, X=x,Y=y,ID2=jugador2))
                 log.append("muerte:{ID}".format(ID=jugador2))
@@ -206,6 +206,8 @@ try:
                     stats[ids][2] = 3;
                 if ( stats[ids][1] == 0 ):
                     jugador_in_for = stats[ids][0]
+                    x_ids, y_ids = stats[ids][3]
+                    battlefield[x_ids][y_ids] = 0
                     log.append("desconectar:{ID}".format(ID=jugador_in_for))
                     matar( conexiones_entrantes, stats, ids ,jugador_in_for)        
 
