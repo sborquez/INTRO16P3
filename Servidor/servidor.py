@@ -18,7 +18,7 @@ import time
 """
 IP = "localhost" 
 PORT = 8888 
-NJ = 2
+NJ = 1
 
 if (NJ <= 2):
     SIZE = 5
@@ -207,6 +207,8 @@ try:
                     stats[ids][2] = 3;
                 if ( stats[ids][1] == 0 ):
                     jugador_in_for = stats[ids][0]
+                    x_ids, y_ids = stats[ids][3]
+                    battlefield[x_ids][y_ids] = 0
                     log.append("desconectar:{ID}".format(ID=jugador_in_for))
                     matar( conexiones_entrantes, stats, ids ,jugador_in_for)        
 
