@@ -147,14 +147,14 @@ try:
             disparo = map(int,(mensaje_recibido.split("/")[0]).split(","))
             if not validar_disparo( disparo ):
                 battefield[x0][y0] = 0
-                log.append("muerte:{ID}".format(ID=jugador))
+                log.append("desconectar:{ID}".format(ID=jugador))
                 matar(conexiones_entrantes,stats, id, jugador)
                 print jugador," ha cometido disparo fuera de rango"
 
             movimiento = map(int,(mensaje_recibido.split("/")[1]).split(","))
             if not validar_movimiento( movimiento ):
                 matar(conexiones_entrante, stats, id , jugador)
-                log.append("muerte:{ID}".format(ID=jugador))
+                log.append("desconectar:{ID}".format(ID=jugador))
                 battefield[x0][y0] = 0
                 print jugador," ha cometido un movimiento fuera de rango"
 
@@ -170,14 +170,15 @@ try:
             x = x if x >= 0 else SIZE + x
             if ( estado ):
                 id_golpeado = battlefield[x][y]
-                stats[id_golpeado][1] = stats[id_golpeado][1] -1
-                stats[id][2] = 3
+                stats[id_golpeado][1] = stats[id_golpeado][1] - 1
+                stats[id][2] = stats[id][2] + 1
+                stats[id][1] = stats[id][1] + 1
                 jugador2 = stats[id_golpeado][0]
                 log.append("disparar:{ID},{X},{Y},{ID2}".format(ID=jugador, X=x,Y=y,ID2=jugador2))
                 log.append("muerte:{ID}".format(ID=jugador2))
                 log.append("aparecer:"+jugador2+","+str(x)+","+str(y))
             else:
-                stats[id][2] = stats[id][2] -1
+                stats[id][2] = stats[id][2] - 1
                 log.append("disparar:{ID},{X},{Y},{OBJ}".format(ID=jugador, X=x,Y=y,OBJ="None"))            
 
             estado = evaluar_movimiento(battlefield, posicion)
