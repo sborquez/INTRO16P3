@@ -83,17 +83,18 @@ def amenaza ( valor ):
     l = [3,3,2,2,1]
     return l [ abs ( valor ) -1 ]
 
-def estimar_amenaza ( posicion,battlefield ,SIZE):
-    amenazas = "a"
-    for i in xrange(2):
-        for j in [-5,-4,-3,-2,-1,1,2,3,4,5]:
+def estimar_amenaza(posicion, battlefield, SIZE):
+    amenazas = list()
+    for i in xrange(2): # eje x e y
+        for j in [-5,-4,-3,-2,-1,1,2,3,4,5]: # distancias visibles
             if (i == 0):
-                if ( battlefield [ periodico ( posicion[i]+j,SIZE)][1] == 1 ):
-                    amenazas+="-"+str(amenaza (j)) 
+                if (battlefield[(posicion[i]+j)%SIZE][1] != 0 ):
+                    amenazas.append("-" + str(amenaza(j)))
             else:
-                if ( battlefield [0][ periodico ( posicion[i]+j, SIZE ) ] == 1 ):
-                    amenazas+="-"+str( amenaza (j) )
-        return amenazas+":"+calcular_cuadrantes( battlefield, posicion )
+                if (battlefield[0][(posicion[i]+j)%SIZE] != 0 ):
+                    amenazas.append("-" + str(amenaza(j)))
+    random.shuffle(amenazas) # revolvemos amenazas para que no sea inferible/hackeable el juego
+    return 'a'+ ''.join(amenazas)+":"+calcular_cuadrantes(battlefield, posicion, SIZE)
 
 def spawn( battlefield , SIZE):
     while (1):
@@ -101,11 +102,11 @@ def spawn( battlefield , SIZE):
         if ( battlefield[x][y] == 0 ):
             return x,y
 
-def calcular_cuadrantes( battlefield, posicion ):
+def calcular_cuadrantes(battlefield, posicion, SIZE):
     l = [0,0,0,0]
     x , y = posicion[0], posicion[1]
-    for i in xrange(10):
-        for j in xrange(10):
+    for i in xrange(SIZE):
+        for j in xrange(SIZE):
             if battlefield[i][j] !=0:
                 if i <= x and j < y:
                     l[1] = l[1]+1
