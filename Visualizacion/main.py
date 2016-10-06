@@ -10,6 +10,17 @@ from time import sleep
 
 TITULO = "Speis Guars"
 
+# Velocidad de reproduccion.
+# 0 muy lento
+# 1 lento
+# 2 normal
+# 3 rapido
+# 4 muy rapido
+V = 2
+
+# Valores para la velocidad de reproduccion.
+VELOCIDADES = [1.2, 0.5, 0.1, 0.05, 0.005]
+
 #  Constantes de tamaños para dibujar.
 SPACESHIPS = 45
 BATTLEFIELDSIZE = 460.0
@@ -46,7 +57,8 @@ class Inicio(Scene):
            start_replay:    (bool) Comenzar a reproducir el replay.
            replay:          (list(string)) Lineas del archivo log.
            players:         (dict((ID:Jugador)) Contiene objetos Jugadores.
-           colortxt:        (list(int,int, int))Color del texto en RGB."""
+           colortxt:        (list(int,int, int))Color del texto en RGB.
+    """
 
     def __init__(self, director, path_log):
         """Parametros.
@@ -112,7 +124,8 @@ class Inicio(Scene):
     def on_draw(self, screen):
         """ Refrescar datos en la pantalla.
             Parametros:
-                - screen: Ventana donde se dibuja."""
+                - screen: Ventana donde se dibuja.
+        """
         screen.blit(self.background, (0, 0))
         screen.blit(self.textinscreen, (WIDTH/3, 5*HEIGHT/6))
 
@@ -140,6 +153,7 @@ class Principal(Scene):
             end_replay:      (bool) Indica si ha terminado el replay.
             acciones:        (list(str) Pila de informacion ya leida.
             turnos_restantes:(int)turnos restantes para que termine el juego.
+            vel              (int) indice de velocidad de reproduccion
     """
 
     def __init__(self, director, dict_players, replay):
@@ -181,6 +195,12 @@ class Principal(Scene):
         self.acciones = ["", "", "", "", "", "", "", "", ""]
         self.turnos_restantes = Q_turnos
 
+        # velocidad de reproduccion
+        self.vel = V
+
+        # puntero
+        self.puntero = Pointer()
+
     def on_update(self):
         """ Actualizar datos, cambia de escena si es necesario. """
 
@@ -190,7 +210,10 @@ class Principal(Scene):
 
         # Si se termino de actualizar los datos de un turno, leer el siguiente.
         if self.next_turn:
-            sleep(0.05)
+            self.puntero.ocultarse()
+            # Velocidad del juego
+            sleep(VELOCIDADES[self.vel])
+
             del self.acciones[-1]
             self.acciones.insert(0, "")
             self.next_turn = False
@@ -209,6 +232,11 @@ class Principal(Scene):
         if event == pygame.K_SPACE:
             pygame.mixer.music.stop()
             self.end_replay = True
+        if event == pygame.K_DOWN and self.vel != 0:
+            self.vel -= 1
+
+        elif event == pygame.K_UP and self.vel != 5:
+            self.vel += 1
 
     def on_draw(self, screen):
         """ Refrescar datos en la pantalla.
@@ -230,6 +258,11 @@ class Principal(Scene):
             else:
                 textinscreen = fuenteS.render(texto, 1, (255, 255, 255))
                 screen.blit(textinscreen, (15, 85-i*10))
+
+        # Puntero
+        if self.puntero.mostrar:
+            self.puntero.ocultarse()
+            self.puntero.mostrar_tablero(screen)
 
         # Jugadores
         coor_y = 150
@@ -318,16 +351,16 @@ class Estadisticas(Scene):
 
         for jugador, resultados in self.resultados.items():
             porcentaje_aciertos = calcular_porcentaje(
-                                            resultados[3] + resultados[2],
-                                            resultados[2])
+                resultados[3] + resultados[2],
+                resultados[2])
             porcentaje_muerte_colision = calcular_porcentaje(
-                                            resultados[0],
-                                            resultados[1])
+                resultados[0],
+                resultados[1])
             self.resultados[jugador][4] = porcentaje_aciertos
             self.resultados[jugador][5] = porcentaje_muerte_colision
             self.top.append((resultados[2]-resultados[0],
                              resultados[2],
-                            jugador))
+                             jugador))
             self.top.sort()
             self.top.reverse()
 
@@ -357,12 +390,12 @@ class Estadisticas(Scene):
 
         title = fuenteL.render("Estadisticas", 0, (255, 255, 255))
         screen.blit(title, (320, 40))
-        cabezera = fuenteM.render(formato_h.format("n", "ID", 
-                                                 "Aciertos", "Fallidos",
-                                                 "Muertes", "Colisiones", 
-                                                 "Eficiencia", "Accidentes"),
-                                                  0, (255, 255, 255))
-        screen.blit(cabezera, (40,80))
+        cabezera = fuenteM.render(formato_h.format("n", "ID",
+                                                   "Aciertos", "Fallidos",
+                                                   "Muertes", "Colisiones",
+                                                   "Eficiencia", "Accidentes"),
+                                  0, (255, 255, 255))
+        screen.blit(cabezera, (40, 80))
         inicial = self.primero_mostrando
         Y = 120
         while Y < 480:
@@ -386,13 +419,13 @@ class Estadisticas(Scene):
             accidentes = fuenteM.render(str(self.resultados[jugador][5])+"%",
                                         0, (255, 255, 255))
 
-            screen.blit(jugador_id, (40,Y))
-            screen.blit(aciertos, (200,Y))
-            screen.blit(fallidos, (300,Y))
-            screen.blit(muertes, (400,Y))
-            screen.blit(colisiones, (500,Y))
-            screen.blit(eficiencia, (610,Y))
-            screen.blit(accidentes, (730,Y))
+            screen.blit(jugador_id, (40, Y))
+            screen.blit(aciertos, (200, Y))
+            screen.blit(fallidos, (300, Y))
+            screen.blit(muertes, (400, Y))
+            screen.blit(colisiones, (500, Y))
+            screen.blit(eficiencia, (610, Y))
+            screen.blit(accidentes, (730, Y))
 
             inicial += 1
             Y += 30
@@ -721,6 +754,50 @@ class Bala(pygame.sprite.Sprite):
         """ Dibuja el disparo en la pantalla.s """
         screen.blit(self.image, self.rect)
 
+
+class Pointer(pygame.sprite.Sprite):
+
+    """ Idicador del jugador actual en el mapa."""
+
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+
+        # Datos dibujo
+        # Sprites
+        path = os.path.join("data", "sprites", "puntero", "puntero.png")
+        self.imagen_master = cargar_sprite(path, 1.2)
+        self.image = cargar_sprite(path)
+        self.rect = self.image.get_rect()
+        self.rect.centerx = -1200
+        self.rect.centery = -1200
+
+        # Posicion
+        self.battlefieldpos_x = -100
+        self.battlefieldpos_y = -100
+
+        # Estado
+        self.mostrar = False
+
+    def apuntarA(self, jugador):
+        coor_x = jugador.battlefieldpos_x
+        coor_y = jugador.battlefieldpos_y
+        self.battlefieldpos_x = coor_x
+        self.battlefieldpos_y = coor_y
+
+        # Se transforman las coordenas del tablero a las de pygame.
+        new_x, new_y = transformar_coordenadas(coor_x, coor_y)
+        self.rect.centerx = new_x
+        self.rect.centery = new_y
+
+    def ocultarse(self):
+        self.mostrar = False
+
+    def mostrarse(self):
+        self.mostrar = True
+
+    def mostrar_tablero(self, screen):
+        screen.blit(self.image, self.rect)
+
 # ------------------------
 # DEFINICION DE FUNCIONES
 # ------------------------
@@ -785,8 +862,6 @@ def cargar_jugadores(replay):
         elif argumentos == "comenzar":
             return jugadores
 
-# TODO
-
 
 def discriminar_accion(scene, accion, argumentos):
     """ Por cada comando del logfile, determina que accion tomar.
@@ -800,6 +875,8 @@ def discriminar_accion(scene, accion, argumentos):
         ID, x, y = argumentos.split(",")
         jugador = scene.players[ID]
         jugador.aparecer((int(x), int(y)))
+        scene.puntero.mostrarse()
+        scene.puntero.apuntarA(jugador)
         scene.next_turn = True
         scene.acciones[0] = "Aparecio: {0} en: ({1},{2})".format(ID, x, y)
 
@@ -816,17 +893,19 @@ def discriminar_accion(scene, accion, argumentos):
         new_y = int(new_y)
 
         jugador = scene.players[ID]
+        scene.puntero.apuntarA(jugador)
+        scene.puntero.mostrarse()
         coor_x = jugador.battlefieldpos_x
         coor_y = jugador.battlefieldpos_y
         resultado = (round(new_x - coor_x, 2), round(new_y - coor_y, 2))
 
-        if 0.01 < resultado[0] <= 1 or resultado[0] < -1:
+        if 0.01 < resultado[0] <= 3 or resultado[0] < -3:
             jugador.mover("rigth")
-        elif -0.01 > resultado[0] >= -1 or resultado[0] > 1:
+        elif -0.01 > resultado[0] >= -3 or resultado[0] > 3:
             jugador.mover("left")
-        elif 0.01 < resultado[1] <= 1 or resultado[1] < -1:
+        elif 0.01 < resultado[1] <= 3 or resultado[1] < -3:
             jugador.mover("down")
-        elif -0.01 > resultado[1] >= -1 or resultado[1] > 1:
+        elif -0.01 > resultado[1] >= -3 or resultado[1] > 3:
             jugador.mover("up")
         else:
             scene.next_turn = True
@@ -834,6 +913,8 @@ def discriminar_accion(scene, accion, argumentos):
     elif accion == "disparar":
         origen, coor_x, coor_y, objetivo = argumentos.split(",")
         jugador_origen = scene.players[origen]
+        scene.puntero.apuntarA(jugador_origen)
+        scene.puntero.mostrarse()
         scene.next_turn = jugador_origen.disparar(coor_x, coor_y, objetivo)
         if objetivo == "None":
             scene.acciones[0] = "Disaparo fallido: {0} a ({1},{2})".format(
@@ -846,6 +927,8 @@ def discriminar_accion(scene, accion, argumentos):
         sleep(0.25)
         scene.acciones[0] = "Muere: {0}".format(argumentos)
         jugador = scene.players[argumentos]
+        scene.puntero.apuntarA(jugador)
+        scene.puntero.mostrarse()
         scene.next_turn = jugador.morir()
         if scene.next_turn:
             jugador.quitar_vida()
@@ -855,6 +938,8 @@ def discriminar_accion(scene, accion, argumentos):
         sleep(0.25)
         scene.acciones[0] = "Colisiona: {0}".format(argumentos)
         jugador = scene.players[argumentos]
+        scene.puntero.apuntarA(jugador)
+        scene.puntero.mostrarse()
         scene.next_turn = jugador.morir()
         if scene.next_turn:
             jugador.quitar_vida()
@@ -906,7 +991,7 @@ def elegir_partidas(logs):
     print "Archivos encontrados:"
     for log, (path, FECHA, TAMANHO) in enumerate(logs):
         print "\t> {0}:\t".format(log),
-        print "Path:{0}\tFecha:{1}\tTamaño:{2}".format(path,FECHA, TAMANHO)
+        print "Path:{0}\tFecha:{1}\tTamaño:{2}".format(path, FECHA, TAMANHO)
 
     while True:
         try:
@@ -915,19 +1000,22 @@ def elegir_partidas(logs):
             return path, tamanho
         except IndexError:
             print "Entrada incorrecta."
-        except  ValueError:
+        except ValueError:
             print "Ingrese un numero."
+
 
 def calcular_porcentaje(total, porcion):
     try:
-        return round((porcion/float(total))*100,1)
+        return round((porcion/float(total))*100, 1)
     except ZeroDivisionError:
         return 0.0
 # -----
 # MAIN
 # -----
 
+
 if __name__ == "__main__":
+
     logs = buscar_logs()
     path, BATTLEFIELDDIVISIONS = elegir_partidas(logs)
 
