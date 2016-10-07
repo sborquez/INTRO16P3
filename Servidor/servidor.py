@@ -18,11 +18,11 @@ import time
 """
 IP = "localhost" 
 PORT = 8888 
-NJ = 1
+NJ = 2
 
-if (NJ < 5):
-    SIZE = 10
-elif (NJ < 10):
+if (NJ <= 5):
+    SIZE = 11
+elif (NJ <= 10):
     SIZE = 15
 else:
     SIZE = 20
@@ -110,7 +110,8 @@ def spawn_all( battlefield , conexiones_entrantes, log):
 #Muy importante revisar el log una vez terminada la partida, el log entrega un resumen de lo que resulto la partida
 log = list()
 title = time.strftime("%c").replace(" ","_")
-log.append("#TITLE;"+title+"/"+str(SIZE))
+log.append("#TITLE;"+str(title)+"/"+str(SIZE))
+title = title.replace(":","_").replace("/","-")
 battlefield = numpy.tile(0,(SIZE,SIZE))
 servidor = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
 
