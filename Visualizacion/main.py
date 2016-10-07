@@ -465,11 +465,15 @@ class Final(Scene):
         pygame.mixer.music.play(0, 0.0)
 
         # Podio
-        self.podio = Podio()
+        self.primer = Podio("1st.png", 425)
+        self.segundo = Podio("2nd.png", 175)
+        self.tercer = Podio("3rd.png", 675 )
 
     def on_update(self):
         """ Actualizar datos, cambia de escena si es necesario. """
-        self.podio.subir()
+        self.primer.subir()
+        self.segundo.subir()
+        self.tercer.subir()
         pass
 
     def on_event(self, event):
@@ -482,7 +486,9 @@ class Final(Scene):
         screen.blit(self.background, (0, 0))
         title = fuenteL.render("Congratulation", 0, (255, 255, 255))
 
-        self.podio.mostrar(screen)
+        self.primer.mostrar(screen)
+        self.segundo.mostrar(screen)
+        self.tercer.mostrar(screen)
         screen.blit(title, (290, 40))
 
 
@@ -870,25 +876,24 @@ class Pointer(pygame.sprite.Sprite):
         screen.blit(nombre, (self.textX, self.textY))
 
 class Podio(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, img, x):
         pygame.sprite.Sprite.__init__(self)
 
         # Datos dibujo
         # Sprites
-        path = os.path.join("data", "sprites", "podio.png")
+        path = os.path.join("data", "sprites", "Podium", img)
         self.imagen_master = cargar_sprite(path, 0)
         self.image = cargar_sprite(path)
         self.rect = self.image.get_rect()
-        self.rect.centerx = 290
+        self.rect.centerx = x
         self.rect.centery = 800
 
     def subir(self):
         if self.rect.centery > 350:
-            self.rect.centery -= 5
+            self.rect.centery -= 2
 
     def mostrar(self, screen):
         screen.blit(self.image, self.rect)
-
 # ------------------------
 # DEFINICION DE FUNCIONES
 # ------------------------
@@ -899,7 +904,11 @@ def cargar_sprite(path, escala=1):
         Parametros:
             escala: (float) escala de conversion.
     """
-    image = load_image(path, True)
+    if escala == 0:
+        image = load_image(path, False)
+    else:
+        image = load_image(path, True)
+        
     width, height = image.get_size()
 
     if escala > 0:
