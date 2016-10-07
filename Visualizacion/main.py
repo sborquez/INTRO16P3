@@ -324,6 +324,9 @@ class Estadisticas(Scene):
         self.resultados = dict()
         self.top = list()
 
+        # Final?
+        self.end_replay = False
+
         with open(director.path_log) as log:
             self.replay = log.readlines()
             self.replay.pop(0)
@@ -374,13 +377,19 @@ class Estadisticas(Scene):
 
     def on_update(self):
         """ Actualizar datos, cambia de escena si es necesario. """
-        pass
+        if self.end_replay:
+            self.director.change_scene(Final(self.director))
 
     def on_event(self, event):
         """ Revisa si ocurrio un evento en el bucle principal. """
         if event == pygame.K_DOWN:
             if self.total_jugadores - self.primero_mostrando + 1 > 12:
                 self.primero_mostrando += 1
+
+        elif event == pygame.K_SPACE:
+            pygame.mixer.music.stop()
+            self.end_replay = True
+
         elif event == pygame.K_UP:
             if self.primero_mostrando != 1:
                 self.primero_mostrando -= 1
@@ -434,6 +443,48 @@ class Estadisticas(Scene):
 
             inicial += 1
             Y += 30
+
+class Final(Scene):
+
+    def __init__(self, director):
+        """ Parametros:
+                - director: Objeto MainFrame, manipulador del juego.
+        """
+
+        Scene.__init__(self, director)
+        # Informacion de escena.
+        # backgound: Imagen de fondo.
+        background_path = os.path.join("data", "background", "final.jpg")
+        self.background = load_image(background_path)
+
+        # Musica.
+        musica_path = os.path.join(
+            "data", "music", "Victory and Respite(end).mp3")
+        pygame.mixer.music.load(musica_path)
+        pygame.mixer.music.set_volume(0.8)
+        pygame.mixer.music.play(0, 0.0)
+
+        # Podio
+        self.podio = Podio()
+
+    def on_update(self):
+        """ Actualizar datos, cambia de escena si es necesario. """
+        self.podio.subir()
+        pass
+
+    def on_event(self, event):
+        """ Revisa si ocurrio un evento en el bucle principal. """
+
+    def on_draw(self, screen):
+        """ Refrescar datos en la pantalla."""
+        # Mostramos las estadisticas en la escena estadisticas
+
+        screen.blit(self.background, (0, 0))
+        title = fuenteL.render("Congratulation", 0, (255, 255, 255))
+
+        self.podio.mostrar(screen)
+        screen.blit(title, (290, 40))
+
 
 # Clases de sprites.
 
@@ -818,6 +869,26 @@ class Pointer(pygame.sprite.Sprite):
         nombre = fuenteM.render(self.ID, 0, (255, 255, 255))
         screen.blit(nombre, (self.textX, self.textY))
 
+class Podio(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+
+        # Datos dibujo
+        # Sprites
+        path = os.path.join("data", "sprites", "podio.png")
+        self.imagen_master = cargar_sprite(path, 0)
+        self.image = cargar_sprite(path)
+        self.rect = self.image.get_rect()
+        self.rect.centerx = 290
+        self.rect.centery = 800
+
+    def subir(self):
+        if self.rect.centery > 350:
+            self.rect.centery -= 5
+
+    def mostrar(self, screen):
+        screen.blit(self.image, self.rect)
+
 # ------------------------
 # DEFINICION DE FUNCIONES
 # ------------------------
@@ -828,14 +899,19 @@ def cargar_sprite(path, escala=1):
         Parametros:
             escala: (float) escala de conversion.
     """
-    escala = 4.0/BATTLEFIELDDIVISIONS * escala
     image = load_image(path, True)
-
     width, height = image.get_size()
 
+    if escala > 0:
+        escala = 4.0/BATTLEFIELDDIVISIONS * escala
+    elif escala == 0:
+        escala = 1
+    else:
+        escala = escala * -1
     return pygame.transform.scale(image,
                                   (int((width*escala)),
                                    int(height*escala)))
+
 
 
 def dibujar_cuadricula(screen):
