@@ -783,6 +783,9 @@ class Pointer(pygame.sprite.Sprite):
         # Estado
         self.mostrar = False
 
+        # ID player
+        self.ID = ""
+
     def apuntarA(self, jugador):
         coor_x = jugador.battlefieldpos_x
         coor_y = jugador.battlefieldpos_y
@@ -794,6 +797,15 @@ class Pointer(pygame.sprite.Sprite):
         self.rect.centerx = new_x
         self.rect.centery = new_y
 
+        deltaY = (2*BATTLEFIELDSIZE) / (3* BATTLEFIELDDIVISIONS)
+        deltaX = BATTLEFIELDSIZE / (2* BATTLEFIELDDIVISIONS)
+
+        self.ID = jugador.ID
+        self.textX = self.rect.centerx-deltaX
+        if coor_y + 1 != BATTLEFIELDDIVISIONS:
+            self.textY = self.rect.centery+deltaY
+        else:
+            self.textY = self.rect.centery-(3*deltaY/2)
     def ocultarse(self):
         self.mostrar = False
 
@@ -802,6 +814,9 @@ class Pointer(pygame.sprite.Sprite):
 
     def mostrar_tablero(self, screen):
         screen.blit(self.image, self.rect)
+
+        nombre = fuenteM.render(self.ID, 0, (255, 255, 255))
+        screen.blit(nombre, (self.textX, self.textY))
 
 # ------------------------
 # DEFINICION DE FUNCIONES
