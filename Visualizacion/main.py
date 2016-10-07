@@ -469,11 +469,18 @@ class Final(Scene):
         self.segundo = Podio("2nd.png", 175)
         self.tercer = Podio("3rd.png", 675 )
 
+        # Sounds effects
+        f1 = os.path.join("data", "sfx", "fireworks_launch_denoised.wav")
+        f2 = os.path.join("data", "sfx", "blow.aif")
+        self.launch = pygame.mixer.Sound(f1)
+        self.explosion = pygame.mixer.Sound(f2)  
+
     def on_update(self):
         """ Actualizar datos, cambia de escena si es necesario. """
-        self.primer.subir()
-        self.segundo.subir()
-        self.tercer.subir()
+        if (self.primer.subir(3.4) 
+            and self.segundo.subir(2.5)
+             and   self.tercer.subir(2)):
+            pass
         pass
 
     def on_event(self, event):
@@ -484,7 +491,7 @@ class Final(Scene):
         # Mostramos las estadisticas en la escena estadisticas
 
         screen.blit(self.background, (0, 0))
-        title = fuenteL.render("Congratulation", 0, (255, 255, 255))
+        title = fuenteL.render("Congratulations", 0, (255, 255, 255))
 
         self.primer.mostrar(screen)
         self.segundo.mostrar(screen)
@@ -888,9 +895,11 @@ class Podio(pygame.sprite.Sprite):
         self.rect.centerx = x
         self.rect.centery = 800
 
-    def subir(self):
+    def subir(self, n):
         if self.rect.centery > 350:
-            self.rect.centery -= 2
+            self.rect.centery -= n
+            return False
+        return True
 
     def mostrar(self, screen):
         screen.blit(self.image, self.rect)
