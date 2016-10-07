@@ -81,6 +81,8 @@ class Inicio(Scene):
         # players: Diccionario de clases Jugador (ID:Jugador).
         with open(path_log) as log:
             self.replay = log.readlines()
+            while "\n" in self.replay:
+                self.replay.remove("\n")
             self.replay.pop(0)
         self.players = cargar_jugadores(self.replay)
 
@@ -220,22 +222,25 @@ class Principal(Scene):
             linea = self.replay.pop(0)
             self.linea = linea.strip().split(":")
         accion, argumentos = self.linea
-        discriminar_accion(self, accion, argumentos)
+        try:
+            discriminar_accion(self, accion, argumentos)
+        except KeyError, e:
+            print "ERROR:", self.linea
+            print "Error: jugador ya fué eliminado.", e
+            self.next_turn = True
 
     def on_event(self, event):
         """ Revisa si ocurrio un evento en el bucle principal.
             Parametros:
                 - event: Indica si se ha apretado 'espacio'.
         """
-
-        # TEST
         if event == pygame.K_SPACE:
             pygame.mixer.music.stop()
             self.end_replay = True
-        if event == pygame.K_DOWN and self.vel != 0:
+        if event == pygame.K_DOWN and self.vel >= 1:
             self.vel -= 1
 
-        elif event == pygame.K_UP and self.vel != 5:
+        elif event == pygame.K_UP and self.vel <= 3:
             self.vel += 1
 
     def on_draw(self, screen):
@@ -568,7 +573,7 @@ class Jugador(pygame.sprite.Sprite):
         """
         # Miniatura de la nave.
         sprite = pygame.transform.scale(self.image, (15, 15))
-        nombre = fuenteM.render(self.ID, 0, (255, 255, 255))
+        nombre = fuenteS.render(self.ID, 0, (255, 255, 255))
         vidas = fuenteVidas.render("x"+str(self.vidas), 0, (240, 240, 240))
 
         screen.blit(sprite, (coor_x, coor_y))
