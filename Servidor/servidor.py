@@ -20,9 +20,7 @@ IP = "localhost"
 PORT = 8888 
 NJ = 1
 
-if (NJ <= 2):
-    SIZE = 5
-elif (NJ < 5):
+if (NJ < 5):
     SIZE = 10
 elif (NJ < 10):
     SIZE = 15
