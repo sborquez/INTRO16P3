@@ -20,11 +20,9 @@ IP = "localhost"
 PORT = 8888 
 NJ = 2
 
-if (NJ <= 2)
-    SIZE = 5
-elif (NJ < 5):
-    SIZE = 10
-elif (NJ < 10):
+if (NJ <= 5):
+    SIZE = 11
+elif (NJ <= 10):
     SIZE = 15
 else:
     SIZE = 20
@@ -112,7 +110,8 @@ def spawn_all( battlefield , conexiones_entrantes, log):
 #Muy importante revisar el log una vez terminada la partida, el log entrega un resumen de lo que resulto la partida
 log = list()
 title = time.strftime("%c").replace(" ","_")
-log.append("#TITLE;"+title+"/"+str(SIZE))
+log.append("#TITLE;"+str(title)+"/"+str(SIZE))
+title = title.replace(":","_").replace("/","-")
 battlefield = numpy.tile(0,(SIZE,SIZE))
 servidor = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
 
@@ -146,16 +145,16 @@ try:
             
             disparo = map(int,(mensaje_recibido.split("/")[0]).split(","))
             if not validar_disparo( disparo ):
-                battefield[x0][y0] = 0
-                log.append("muerte:{ID}".format(ID=jugador))
+                battlefield[x0][y0] = 0
+                log.append("desconectar:{ID}".format(ID=jugador))
                 matar(conexiones_entrantes,stats, id, jugador)
                 print jugador," ha cometido disparo fuera de rango"
 
             movimiento = map(int,(mensaje_recibido.split("/")[1]).split(","))
             if not validar_movimiento( movimiento ):
-                matar(conexiones_entrante, stats, id , jugador)
-                log.append("muerte:{ID}".format(ID=jugador))
-                battefield[x0][y0] = 0
+                matar(conexiones_entrantes, stats, id , jugador)
+                log.append("desconectar:{ID}".format(ID=jugador))
+                battlefield[x0][y0] = 0
                 print jugador," ha cometido un movimiento fuera de rango"
 
             disparo = posicion[0] + disparo[0], posicion[1] + disparo[1]
@@ -170,14 +169,15 @@ try:
             x = x if x >= 0 else SIZE + x
             if ( estado ):
                 id_golpeado = battlefield[x][y]
-                stats[id_golpeado][1] = stats[id_golpeado][1] -1
-                stats[id][2] = stats[id][2] +1
+                stats[id_golpeado][1] = stats[id_golpeado][1] - 1
+                stats[id][2] = stats[id][2] + 1
+                stats[id][1] = stats[id][1] + 1
                 jugador2 = stats[id_golpeado][0]
                 log.append("disparar:{ID},{X},{Y},{ID2}".format(ID=jugador, X=x,Y=y,ID2=jugador2))
                 log.append("muerte:{ID}".format(ID=jugador2))
                 log.append("aparecer:"+jugador2+","+str(x)+","+str(y))
             else:
-                stats[id][2] = stats[id][2] -1
+                stats[id][2] = stats[id][2] - 1
                 log.append("disparar:{ID},{X},{Y},{OBJ}".format(ID=jugador, X=x,Y=y,OBJ="None"))            
 
             estado = evaluar_movimiento(battlefield, posicion)
@@ -206,11 +206,16 @@ try:
                     stats[ids][2] = 3;
                 if ( stats[ids][1] == 0 ):
                     jugador_in_for = stats[ids][0]
+                    x_ids, y_ids = stats[ids][3]
+                    battlefield[x_ids][y_ids] = 0
                     log.append("desconectar:{ID}".format(ID=jugador_in_for))
                     matar( conexiones_entrantes, stats, ids ,jugador_in_for)        
 
 except KeyboardInterrupt:
     print "STOP IT!"
+
+except Exception as e:
+    print "Unexpected error:", type(e), "Argumentos",e.args
 
 servidor.close()
 log.append("juego:terminar")

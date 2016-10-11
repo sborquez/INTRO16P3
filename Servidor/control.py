@@ -80,7 +80,7 @@ def periodico ( r ,SIZE):
     return r
 
 def amenaza ( valor ):
-    l = [3,3,2,2,1]
+    l = [3,2,2,1,1]
     return l [ abs ( valor ) -1 ]
 
 def estimar_amenaza(posicion, battlefield, SIZE):
@@ -88,10 +88,10 @@ def estimar_amenaza(posicion, battlefield, SIZE):
     for i in xrange(2): # eje x e y
         for j in [-5,-4,-3,-2,-1,1,2,3,4,5]: # distancias visibles
             if (i == 0):
-                if (battlefield[(posicion[i]+j)%SIZE][1] != 0 ):
+                if (battlefield[(posicion[0]+j)%SIZE][posicion[1]] != 0 ):
                     amenazas.append("-" + str(amenaza(j)))
             else:
-                if (battlefield[0][(posicion[i]+j)%SIZE] != 0 ):
+                if (battlefield[posicion[0]][(posicion[1]+j)%SIZE] != 0 ):
                     amenazas.append("-" + str(amenaza(j)))
     random.shuffle(amenazas) # revolvemos amenazas para que no sea inferible/hackeable el juego
     return 'a'+ ''.join(amenazas)+":"+calcular_cuadrantes(battlefield, posicion, SIZE)
