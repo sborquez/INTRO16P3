@@ -9,15 +9,14 @@ from control import *
 import random 
 import time
 
-
 """
     Aqui deben asignar valores para configurar la partida a su gusto
-    IP: Escoger una ip distinta a localhost si es que desean jugar con otro computador
-    PORT: No recomiendo cambiarlo, pero aun esta a su disposición cambiarlo
+    IP: localhost para ejecutar en el mismo computador. Colocar IP del computador para jugar en LAN.
+    PORT: 0 buscara cualquier puerto disponible
     NJ: Cantidad de bots que participaran en la partida
 """
 IP = "localhost" 
-PORT = 8888 
+PORT = 0 
 NJ = 2
 
 if (NJ <= 5):
@@ -60,13 +59,15 @@ def generar_id(conexiones_entrantes):
 def conectar(server, log):
     log.append("juego:cargar")
     conexiones_entrantes = dict()
+    i = 1
     while( len (conexiones_entrantes) < NJ ):
         socket_o, socket_info = server.accept()
         nombre_usuario = socket_o.recv(1024)
         id = generar_id( conexiones_entrantes )
         conexiones_entrantes[ id ] = (socket_o,socket_info,nombre_usuario)
         log.append("conectado:"+nombre_usuario)
-        print "Conexion exitosa!"
+        print str(i) + '/' + str(NJ), " - Conexion exitosa de", nombre_usuario ,"!"
+        i += 1
     print "Todos se han conectado"
     return conexiones_entrantes
 
@@ -115,8 +116,7 @@ title = title.replace(":","_").replace("/","-")
 battlefield = numpy.tile(0,(SIZE,SIZE))
 servidor = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
 
-# Si desea escoger un puerto en especifico cambiar 0, por PORT, de lo contrario, buscara cualquier puerto disponible
-servidor.bind( (IP,0 ) ) 
+servidor.bind( (IP, PORT) ) 
 # Indica a que IP y PORT deben conectarse los clientes
 print servidor.getsockname()
 servidor.listen(NJ)
