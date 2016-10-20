@@ -184,7 +184,7 @@ try:
                     log.append("desconectar:{ID}".format(ID=jugador2))
                     matar( conexiones_entrantes, stats, id_golpeado ,jugador2)
                 else:
-                    log.append("aparecer:"+jugador2+","+str(x)+","+str(y))
+                    log.append("aparecer:{ID},{X},{Y}".format(ID=jugador2, X=x,Y=y))
             else:
                 stats[id][2] = stats[id][2] - 1
                 log.append("disparar:{ID},{X},{Y},{OBJ}".format(ID=jugador, X=x,Y=y,OBJ="None"))
@@ -219,7 +219,7 @@ try:
                 matar( conexiones_entrantes, stats, id,jugador)
                 log.append("desconectar:{ID}".format(ID=jugador))
                 # para que vuelva a mostrar imagen de jugador colisionado
-                log.append("moverse:{ID},{X},{Y}".format(ID=jugador2, X=x1,Y=y1))
+                log.append("aparecer:{ID},{X},{Y}".format(ID=jugador2, X=x1,Y=y1))
                 if ( stats[id_golpeado][1] == 0 ):
                     battlefield[x1][y1] = 0
                     log.append("desconectar:{ID}".format(ID=jugador2))
