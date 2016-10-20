@@ -10,13 +10,14 @@ def spawn(cliente):
     posicion = mensaje.split(",")
     return int(posicion[0]), int(posicion[1])
 cliente = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
-IP = raw_input("ingrese la ip ")
+IP = raw_input("Ingrese la IP: ")
 if not IP:
     IP = '127.0.0.1'
-PORT = input("ingrese el puerto ")
+    print 'Utilizando localhost'
+PORT = input("Ingrese el puerto: ")
 cliente.connect( (IP ,PORT ) )
 print "Conectado"
-name  = randint(0,991)
+name  = randint(0, 991)
 cliente.send( "dummy{0}".format(name) )
 posicion = spawn(cliente) 
 
@@ -24,7 +25,6 @@ juego = 1
 print "Start"
 try:
     while (juego):
-
         mensaje = cliente.recv(1024)
         amenazas = mensaje.split(":")[0]
         disparo = escoger_disparo( amenazas )
