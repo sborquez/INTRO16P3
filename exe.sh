@@ -7,7 +7,6 @@ read answer
 if [ "$answer" == "s" ]; then
 	cd Servidor/
 	python servidor.py
-	clear
 elif [ "$answer" == "c" ]; then
 	cd Cliente/
 	echo -n "Dummy Bot: "
@@ -20,12 +19,12 @@ elif [ "$answer" == "c" ]; then
 	read port
 	until [ "$dummy" = "0" ]; do
 		echo "Dummy bot n: " $dummy
-		printf "$ip\n$port\n" | python cliente_dummy.py &
+		printf "$ip\n$port\n" | python cliente_dummy.py > o.out &
 		let "dummy -= 1"
 	done
 	until [ "$smart" = "0" ]; do
 		echo "Smart bot n: " $smart
-		printf "$ip\n$port\n" | python cliente_alumnos.py &
+		printf "$ip\n$port\n" | python cliente_alumnos.py > o.out &
 		let "smart -= 1"
 	done
 	exit 0
